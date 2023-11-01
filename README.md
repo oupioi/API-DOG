@@ -23,7 +23,20 @@ npm install -D nodemon
 
 ## Fonctionnement
 
-Commande pour lancer l'api:
+Commande pour lancer l'api (exécutée automatiquement au lancement du docker):
 ```
 npm start
 ```
+
+## Vérifier que la connexion à la base de données fonctionne correctement
+
+```http
+POST http://localhost:3000/sex
+```
+
+```json
+{
+    "name": "Homme"
+}
+```
+Normalement vous avez un response code de "201 Created" et si vous verifiez la table Sex, il sera créé.

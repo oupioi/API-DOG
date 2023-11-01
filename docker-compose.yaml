@@ -1,5 +1,16 @@
 version: '3'
 services:
+  express-db:
+    image: mysql:latest
+    container_name: express-db
+    environment:
+      MYSQL_ROOT_PASSWORD: password123
+      MYSQL_DATABASE: express-db
+      MYSQL_USER: test
+      MYSQL_PASSWORD: password123
+    ports:
+      - 3307:3306
+
   express-app:
     image: node:18.18.2
     container_name: express-api
@@ -13,14 +24,3 @@ services:
     depends_on:
       - express-db
     command: sh -c "npm install && npm start"
-
-  express-db:
-    image: mysql:latest
-    container_name: express-api-db
-    environment:
-      MYSQL_ROOT_PASSWORD: password123
-      MYSQL_DATABASE: express-api-db
-      MYSQL_USER: test
-      MYSQL_PASSWORD: password123
-    ports:
-      - 3306:3306
