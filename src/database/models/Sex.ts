@@ -6,7 +6,7 @@ import {
 } from "sequelize-typescript";
 
 @Table({
-    timestamps: true,
+    timestamps: false,
     tableName: "Sex",
     modelName: "Sex"
 })

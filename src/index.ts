@@ -6,9 +6,14 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import cors from "cors";
-import "./database/connection";
 import Sex from "./database/models/Sex";
+import sequelize from './database/connection';
 
+sequelize.sync().then(() => {
+    console.log('Tables syncronisées');
+}).catch((error) => {
+    console.log(error);
+})
 const app = express();
 
 app.use(cors({
