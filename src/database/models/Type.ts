@@ -5,12 +5,17 @@ import {
     DataType
 } from "sequelize-typescript";
 
+enum TypeFor {
+    event = "event",
+    alert = "alert"
+}
+
 @Table({
     timestamps: false,
-    tableName: "sex",
-    modelName: "Sex"
+    tableName: "type",
+    modelName: "Type"
 })
-class Sex extends Model
+class Type extends Model
 {
     @Column({
         primaryKey: true,
@@ -20,11 +25,16 @@ class Sex extends Model
     declare id: number;
 
     @Column({
+        type: DataType.ENUM(...Object.values(TypeFor)),
+        allowNull: false,
+    })
+    declare for: TypeFor;
+
+    @Column({
         type: DataType.STRING,
         allowNull: false
     })
     declare name: string;
-
 }
 
-export default Sex;
+export default Type;
