@@ -8,7 +8,8 @@ import {
 @Table({
     timestamps: false,
     tableName: "address",
-    modelName: "Address"
+    modelName: "Address",
+    underscored: true
 })
 class Address extends Model
 {
@@ -21,9 +22,9 @@ class Address extends Model
 
     @Column({
         type: DataType.TEXT,
-        allowNull: false
+        allowNull: true
     })
-    declare address: string;
+    declare address: string|null;
 
     @Column({
         type: DataType.INTEGER,

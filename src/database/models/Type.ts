@@ -13,7 +13,8 @@ enum TypeFor {
 @Table({
     timestamps: false,
     tableName: "type",
-    modelName: "Type"
+    modelName: "Type",
+    underscored: true
 })
 class Type extends Model
 {

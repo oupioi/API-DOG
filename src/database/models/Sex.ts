@@ -8,7 +8,8 @@ import {
 @Table({
     timestamps: false,
     tableName: "sex",
-    modelName: "Sex"
+    modelName: "Sex",
+    underscored: true
 })
 class Sex extends Model
 {
