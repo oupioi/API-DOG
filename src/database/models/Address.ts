@@ -7,11 +7,11 @@ import {
 
 @Table({
     timestamps: false,
-    tableName: "sex",
-    modelName: "Sex",
+    tableName: "address",
+    modelName: "Address",
     underscored: true
 })
-class Sex extends Model
+class Address extends Model
 {
     @Column({
         primaryKey: true,
@@ -21,11 +21,23 @@ class Sex extends Model
     declare id: number;
 
     @Column({
+        type: DataType.TEXT,
+        allowNull: true
+    })
+    declare address: string|null;
+
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare zipCode: number;
+
+    @Column({
         type: DataType.STRING,
         allowNull: false
     })
-    declare name: string;
+    declare city: string;
 
 }
 
-export default Sex;
+export default Address;

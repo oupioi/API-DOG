@@ -3,6 +3,7 @@ node_modules/
 .vs-code/
 dist/
 package-lock.json
+migrations/
 
 # Logs
 logs
