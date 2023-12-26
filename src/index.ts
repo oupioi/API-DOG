@@ -8,6 +8,7 @@ import compression from "compression";
 import cors from "cors";
 import Sex from "./database/models/Sex";
 import sequelize from './database/connection';
+import apiRouter from './api/ApiRouter';
 
 sequelize.sync().then(() => {
     console.log('Tables syncronisées');
@@ -30,6 +31,9 @@ app.post("/sex", async (req, res) => {
     const sex = await Sex.create(req.body);
     return res.status(201).json(sex);
 })
+
+app.use("/api", apiRouter);
+
 server.listen(3000, () => {
     console.log({
         database: process.env.DB_NAME,
