@@ -19,39 +19,41 @@ router.post("/", async (req: Request, res: Response) => {
 
     const [sex, address] = await Promise.all([sexPromise, addressPromise]);
 
-    res.json({"date": date, "sex": sex, "address": address});
+    // res.json({"date": date, "sex": sex, "address": address});
 
     // Création d'un user en avec une adresse et un sexe déjà existant
-    // User.create({
+    let newUser: User = await User.create({
+        email: "exemple@hotmail.com",
+        password: "mdpbidon",
+        firstName: "Jane",
+        lastName: "Doe",
+        birthdate: date,
+        notifyFriends: false,
+        idSex: sex.id,
+        idAddress: address.id
+    }
+    , {
+        include: [Sex, Address]
+    }
+    )
+
+    // Création d'un user en y ajoutant une nouvelle adresse et un nouveau sexe
+    // let newUser: User = await User.create({
     //     email: "exemple@hotmail.com",
     //     password: "mdpbidon",
     //     firstName: "John",
     //     lastName: "Doe",
     //     birthdate: date,
     //     notifyFriends: false,
-    //     idSex: sex.id,
-    //     idAddress: address.id
+    //     sex: sex,
+    //     address: address.id
     // }
     // , {
     //     include: [Sex, Address]
-    // }
-    // )
-
-    // Création d'un user en y ajoutant une nouvelle adresse et un nouveau sexe
-    User.create({
-        email: "exemple@hotmail.com",
-        password: "mdpbidon",
-        firstName: "John",
-        lastName: "Doe",
-        birthdate: date,
-        notifyFriends: false,
-        sex: sex,
-        address: address.id
-    }
-    , {
-        include: [Sex, Address]
-    }
-    )
+    // })
+    User.findByPk(newUser.id, {include: [{ model: Sex }, { model: Address }]}).then((user: User) => {
+        res.json(user);
+    });
 })
 
 export default router;
