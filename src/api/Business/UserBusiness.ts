@@ -3,6 +3,7 @@ import { UserDTO } from "../RequestBodies/UserDTO";
 import Address from "../../database/models/Address";
 import Sex from "../../database/models/Sex";
 import { AddressBusiness } from "./AddressBusiness";
+import { CustomError } from "../../api/Tools/ErrorHandler";
 
 export class UserBusiness {
     private addressBusiness: AddressBusiness
@@ -15,17 +16,15 @@ export class UserBusiness {
      * Checks if user exists by the given email, if not, creates it.
      * @param userDto 
      * @returns Promise<User>
-     * @throws Error
+     * @throws CustomError
      */
     public async createUser(userDto: UserDTO): Promise<User>
     {
         // Creates address first
-        const address: Address = await this.addressBusiness.createAddress(userDto.address).then((address) => {
-            return address;
-        });
+        const address: Address = await this.addressBusiness.createAddress(userDto.address);
 
         // @todo Hash le password bien évidemment
-        const newUser = await User.findOrCreate({
+        const newUser = User.findOrCreate({
             where: {email: userDto.email},
             defaults: {
                 email: userDto.email,
@@ -39,9 +38,9 @@ export class UserBusiness {
             },
             include: [Address, Sex]
         }).then(([user, created]) => {
-            // if (!created) {
-            //     throw new Error("This email is already used");
-            // }
+            if (!created) {
+                throw new CustomError("This email is already linked to an account");
+            }
             return user;
         });
         return newUser;
@@ -74,7 +73,7 @@ export class UserBusiness {
         // }
         let user: User = await User.findByPk(userDto.id).then();
         if (!user) {
-            throw new Error('Access forbidden');
+            throw new CustomError('Access forbidden');
         }
 
         user.email = userDto.email;
@@ -98,7 +97,7 @@ export class UserBusiness {
             if (user) {
                 return user.destroy();
             } else {
-                throw new Error("User not found");
+                throw new CustomError("User not found");
             }
         });
     }
