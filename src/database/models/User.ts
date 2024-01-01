@@ -4,7 +4,8 @@ import {
     Model,
     DataType,
     ForeignKey,
-    BelongsTo
+    BelongsTo,
+    Validate
 } from "sequelize-typescript";
 import Address from "./Address";
 import Sex from "./Sex";
@@ -34,14 +35,21 @@ class User extends Model
     })
     declare id: number;
 
-
+    @Validate({isEmail: {msg: "Incorrect email address"}, notNull: true})
     @Column({
         type: DataType.STRING,
         allowNull: false
     })
     declare email: string;
 
-
+    @Validate({
+        len: 
+        {
+            msg: "The password must be of 7 caracters length at minimum",
+            args: [7, 30]
+            
+        }
+    })
     @Column({
         type: DataType.TEXT,
         allowNull: false
@@ -62,7 +70,7 @@ class User extends Model
     })
     declare lastName: string;
 
-
+    @Validate({isDate: {args: true, msg: "The birth date is not a date"}})
     @Column({
         type: DataType.DATE,
         allowNull: false
@@ -83,7 +91,6 @@ class User extends Model
     })
     declare idSex: number;
 
-
     @BelongsTo(() => Sex, 'idSex')
     declare sex?: NonAttribute<Sex>;
 
@@ -96,7 +103,9 @@ class User extends Model
     declare idAddress: number;
 
 
-    @BelongsTo(() => Address, 'idAddress')
+    @BelongsTo(() => Address, {
+        onDelete: "CASCADE"
+    })
     declare address: NonAttribute<Address>;
 
 

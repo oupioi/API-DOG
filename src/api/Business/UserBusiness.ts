@@ -39,14 +39,19 @@ export class UserBusiness {
             },
             include: [Address, Sex]
         }).then(([user, created]) => {
-            if (!created) {
-                throw new Error("This email is already used");
-            }
+            // if (!created) {
+            //     throw new Error("This email is already used");
+            // }
             return user;
         });
         return newUser;
     }
 
+    public async getAllUsers()
+    {
+        const users = await User.findAndCountAll().then();
+        return users;
+    }
     /**
      * Return user by its id
      * @param id User id
@@ -63,13 +68,11 @@ export class UserBusiness {
      */
     public async modifyUser(userDto: UserDTO): Promise<User> {
         /** @todo En dûr pour l'instant, récupéré du token par la suite */
-        let id: number = 1;
-        if (id != userDto.id) {
-            console.log([id, userDto.id]);
-            
-            throw new Error('Access forbidden');
-        }
-        let user: User = await User.findByPk(id).then();
+        // let id: number = 1;
+        // if (id != userDto.id) {
+        //     throw new Error('Access forbidden');
+        // }
+        let user: User = await User.findByPk(userDto.id).then();
         if (!user) {
             throw new Error('Access forbidden');
         }
@@ -82,10 +85,21 @@ export class UserBusiness {
         user.birthdate = userDto.birthdate;
         user.notifyFriends = userDto.notifyFriends;
         user.idSex = userDto.sex.id;
-        console.log(user.address);
         this.addressBusiness.modifyUserAddress(user.address, userDto.address).then();
-        
+
         user.save();
         return user;
+    }
+
+    public async deleteUser(id: number)
+    {
+        /** @todo Check dans le token que c'est le bon utilisateur */
+        await User.findByPk(id).then((user: User) => {
+            if (user) {
+                return user.destroy();
+            } else {
+                throw new Error("User not found");
+            }
+        });
     }
 }
