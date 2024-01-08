@@ -46,7 +46,7 @@ class User extends Model
         len: 
         {
             msg: "The password must be of 7 caracters length at minimum",
-            args: [7, 30]
+            args: [7, 244]
             
         }
     })
