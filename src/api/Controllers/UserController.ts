@@ -3,11 +3,12 @@ import User from "../../database/models/User";
 import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { UserBusiness } from "../Business/UserBusiness";
+import { TokenHandler } from "../../api/Tools/TokenHandler";
 
 const router: Router = express.Router();
 const userBusiness: UserBusiness = new UserBusiness();
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/',  TokenHandler.handle, (req: Request, res: Response) => {
     userBusiness.getAllUsers().then((result) => {
         res.json({
             total_items: result.count,
@@ -16,7 +17,7 @@ router.get('/', (req: Request, res: Response) => {
     })
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', TokenHandler.handle, (req, res, next) => {
     try {
         userBusiness.getUserById(parseInt(req.params.id)).then((user) => {
             res.json(user);
@@ -38,7 +39,7 @@ router.post("/", async (req: Request, res: Response, next) => {
     }
 });
 
-router.put('/:id', async (req: Request, res: Response, next) => {
+router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
         //Ajouter un middleware pour check si c'est bien le bon utilisateur (dans le token) et/ou mettre uuid
@@ -50,7 +51,7 @@ router.put('/:id', async (req: Request, res: Response, next) => {
     }
 });
 
-router.delete('/:id', (req: Request, res: Response, next) => {
+router.delete('/:id', TokenHandler.handle, (req: Request, res: Response, next) => {
     userBusiness.deleteUser(parseInt(req.params.id)).then((result: void) => {
         res.status(204);
     }).catch((err) => {next(err);});
