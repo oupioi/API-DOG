@@ -1,4 +1,3 @@
-
 import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
 import {
     Table,
@@ -13,32 +12,35 @@ import {
 } from "sequelize-typescript";
 import User from "./User";
 
+@Table({
+    timestamps: false,
+    tableName: "friends",
+    modelName: "Friends",
+    underscored: true
+})
 class Friends extends Model {
     
     @PrimaryKey
-        get relationId(): string {
-            return `${this.userId1}-${this.userId2}`;
-        }
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare userId1: number;
 
-        @ForeignKey(() => User)
-        @Column({
-            type: DataType.INTEGER,
-            allowNull: false
-        })
-        declare userId1: number;
+    @PrimaryKey
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare userId2: string;
 
-        @ForeignKey(() => User)
-        @Column({
-            type: DataType.INTEGER,
-            allowNull: false
-        })
-        declare userId2: string;
+    @BelongsTo(() => User, "userId1")
+    declare user1: User;
 
-        @BelongsTo(() => User, "userId1")
-        declare user1: User;
-
-        @BelongsTo(() => User, "userId2")
-        declare user2: User;
+    @BelongsTo(() => User, "userId2")
+    declare user2: User;
 
     @Column({
         type: DataType.DATE,
@@ -49,8 +51,8 @@ class Friends extends Model {
     @Column({
         type: DataType.ENUM('pending', 'accepted', 'rejected'),
         allowNull: false,
-      })
-    declare status : string;
+    })
+    declare status: string;
     
 }
 export default Friends;
