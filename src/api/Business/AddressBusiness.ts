@@ -30,8 +30,6 @@ export class AddressBusiness {
     {
         const addressChanged: boolean = address.address != addressDto.address || address.zipCode != addressDto.zipCode || address.city != addressDto.city;
         if (addressChanged) {
-            console.log('changed');
-            
             address.address = addressDto.address;
             address.zipCode = addressDto.zipCode;
             address.city = addressDto.city;

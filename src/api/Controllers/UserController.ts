@@ -1,6 +1,6 @@
 import { UserDTO } from "../RequestBodies/UserDTO";
 import User from "../../database/models/User";
-import express, { Request, Response, Router } from "express";
+import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { UserBusiness } from "../Business/UserBusiness";
 
@@ -31,7 +31,7 @@ router.post("/", async (req: Request, res: Response, next) => {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
         const newUser: User = await userBusiness.createUser(userDto);
         User.findByPk(newUser.id).then((user: User) => {
-            res.json(user);
+            res.status(201).json(user);
         })
     } catch (error) {
         next(error);
@@ -54,6 +54,18 @@ router.delete('/:id', (req: Request, res: Response, next) => {
     userBusiness.deleteUser(parseInt(req.params.id)).then((result: void) => {
         res.status(204);
     }).catch((err) => {next(err);});
+});
+
+router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userDto: UserDTO = plainToInstance(UserDTO, req.body);
+        const token = await userBusiness.login(userDto);
+        res.status(200).json({
+            token: token
+        });
+    } catch (error) {
+        next(error);
+    }
 });
 
 export default router;
