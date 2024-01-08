@@ -1,6 +1,6 @@
 import { AlertDTO } from "api/RequestBodies/AlertDTO";
-import { CustomError } from "api/Tools/ErrorHandler";
-import Alert from "database/models/Alert";
+import { CustomError } from "../../api/Tools/ErrorHandler";
+import Alert from "../../database/models/Alert";
 
 export class AlertBusiness {
     /**

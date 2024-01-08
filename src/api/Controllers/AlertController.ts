@@ -1,4 +1,4 @@
-import { AlertBusiness } from "api/Business/AlertBusiness";
+import { AlertBusiness } from "../../api/Business/AlertBusiness";
 import express, { Router, Request, Response } from "express";
 
 
@@ -23,3 +23,5 @@ router.get('/:id', (req: Request, res: Response, next) => {
         next(err);
     }
 })
+
+export default router;
