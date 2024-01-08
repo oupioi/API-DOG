@@ -4,8 +4,8 @@ import Address from "../../database/models/Address";
 import Sex from "../../database/models/Sex";
 import { AddressBusiness } from "./AddressBusiness";
 import { CustomError } from "../../api/Tools/ErrorHandler";
-import { create, handle } from "../../api/Tools/TokenHandler";
 import bcryptjs from "bcryptjs";
+import { TokenHandler } from "../../api/Tools/TokenHandler";
 
 export class UserBusiness {
     private addressBusiness: AddressBusiness
@@ -76,10 +76,9 @@ export class UserBusiness {
      */
     public async modifyUser(userDto: UserDTO): Promise<User> {
         /** @todo En dûr pour l'instant, récupéré du token par la suite */
-        // let id: number = 1;
-        // if (id != userDto.id) {
-        //     throw new Error('Access forbidden');
-        // }
+        if (TokenHandler.tokenUserId != userDto.id) {
+            throw new CustomError('Access forbidden', 403);
+        }
         
         let user: User = await User.findByPk(
             userDto.id,
@@ -151,7 +150,7 @@ export class UserBusiness {
         }
         const match = await bcryptjs.compare(userDto.password, user.password);
         if (match) {
-            return create(user.id);
+            return TokenHandler.create(user.id);
         }
         throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
     }
