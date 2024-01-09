@@ -1,4 +1,3 @@
-import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
 import {
     Table,
     Column,
@@ -6,19 +5,18 @@ import {
     DataType,
     PrimaryKey,
     ForeignKey,
-    BelongsTo,
-    Validate,
-    AutoIncrement
+    BelongsTo
 } from "sequelize-typescript";
 import User from "./User";
 
 @Table({
     timestamps: false,
-    tableName: "friends",
-    modelName: "Friends",
+    tableName: "friend",
+    modelName: "Friend",
     underscored: true
 })
-class Friends extends Model {
+
+class Friend extends Model {
     
     @PrimaryKey
     @ForeignKey(() => User)
@@ -34,7 +32,7 @@ class Friends extends Model {
         type: DataType.INTEGER,
         allowNull: false
     })
-    declare userId2: string;
+    declare userId2: number;
 
     @BelongsTo(() => User, "userId1")
     declare user1: User;
@@ -55,4 +53,4 @@ class Friends extends Model {
     declare status: string;
     
 }
-export default Friends;
+export default Friend;
