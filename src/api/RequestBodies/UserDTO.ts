@@ -3,6 +3,8 @@ import { SexDTO } from "./SexDTO";
 export class UserDTO {
     id?: number;
 
+    pseudo: string;
+    
     email: string;
 
     password: string;
