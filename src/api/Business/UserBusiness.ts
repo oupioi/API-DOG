@@ -4,6 +4,8 @@ import Address from "../../database/models/Address";
 import Sex from "../../database/models/Sex";
 import { AddressBusiness } from "./AddressBusiness";
 import { CustomError } from "../../api/Tools/ErrorHandler";
+import bcryptjs from "bcryptjs";
+import { TokenHandler } from "../../api/Tools/TokenHandler";
 
 export class UserBusiness {
     private addressBusiness: AddressBusiness
@@ -23,12 +25,12 @@ export class UserBusiness {
         // Creates address first
         const address: Address = await this.addressBusiness.createAddress(userDto.address);
 
-        // @todo Hash le password bien évidemment
+        const hPassword: string = await bcryptjs.hash(userDto.password, 10);
         const newUser = User.findOrCreate({
             where: {email: userDto.email},
             defaults: {
                 email: userDto.email,
-                password: userDto.password,
+                password: hPassword,
                 firstName: userDto.firstName,
                 lastName: userDto.lastName,
                 birthdate: userDto.birthdate,
@@ -46,17 +48,23 @@ export class UserBusiness {
         return newUser;
     }
 
+    /**
+     * Get every user in the database
+     * @returns List of users
+     */
     public async getAllUsers()
     {
         const users = await User.findAndCountAll().then();
         return users;
     }
+
     /**
      * Return user by its id
      * @param id User id
-     * @returns User|null
+     * @returns Promise<User>
      */
-    public async getUserById(id: number) {
+    public async getUserById(id: number)
+    {
         let user: User|null = await User.findByPk(id).then();
         return user;
     }
@@ -64,21 +72,37 @@ export class UserBusiness {
     /**
      * @todo Faire une classe static avec un attribut et une fonction qui va juste servir à check le token et mettre les infos de celui-ci dans la variable.
      * On pourra ensuite récup ces infos de partout dans le code si besoin.
+     * @throws CustomError
      */
     public async modifyUser(userDto: UserDTO): Promise<User> {
         /** @todo En dûr pour l'instant, récupéré du token par la suite */
-        // let id: number = 1;
-        // if (id != userDto.id) {
-        //     throw new Error('Access forbidden');
-        // }
-        let user: User = await User.findByPk(userDto.id).then();
+        if (TokenHandler.tokenUserId != userDto.id) {
+            throw new CustomError('Access forbidden', 403);
+        }
+        
+        let user: User = await User.findByPk(
+            userDto.id,
+            {
+                attributes: {
+                    include: ["password"]
+                }
+            }
+        );
         if (!user) {
             throw new CustomError('Access forbidden');
         }
 
+        const emailUser: User|null = await User.findOne({where: {email: userDto.email}});
+        if (emailUser && emailUser.id != userDto.id) {
+            throw new CustomError("This email is already used")
+        }
+        
+        const match: boolean = await bcryptjs.compare(userDto.password, user.password)
+        if (!match) {
+            const hPassword: string = await bcryptjs.hash(userDto.password, 10);
+            user.password = hPassword;
+        }
         user.email = userDto.email;
-        /** @todo Hash le password */
-        user.password = userDto.password;
         user.firstName = userDto.firstName;
         user.lastName = userDto.lastName;
         user.birthdate = userDto.birthdate;
@@ -86,10 +110,15 @@ export class UserBusiness {
         user.idSex = userDto.sex.id;
         this.addressBusiness.modifyUserAddress(user.address, userDto.address).then();
 
-        user.save();
+        await user.save();
         return user;
     }
 
+    /**
+     * 
+     * @param id User id
+     * @throws CustomError()
+     */
     public async deleteUser(id: number)
     {
         /** @todo Check dans le token que c'est le bon utilisateur */
@@ -100,5 +129,29 @@ export class UserBusiness {
                 throw new CustomError("User not found");
             }
         });
+    }
+
+    /**
+     * Log the user
+     * @param userDto Request body
+     * @returns Promise<string>
+     * @throws CustomError
+     */
+    public async login(userDto: UserDTO)
+    {
+        const user = await User.findOne({
+            where: {
+                email: userDto.email
+            },
+            attributes: ["password"]
+        });
+        if (!user) {
+            throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
+        }
+        const match = await bcryptjs.compare(userDto.password, user.password);
+        if (match) {
+            return TokenHandler.create(user.id);
+        }
+        throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
     }
 }
