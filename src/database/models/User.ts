@@ -9,7 +9,7 @@ import {
 } from "sequelize-typescript";
 import Address from "./Address";
 import Sex from "./Sex";
-import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
+import { BelongsToSetAssociationMixin, NonAttribute, Op } from "sequelize";
 
 @Table({
     timestamps: false,
@@ -43,11 +43,25 @@ class User extends Model
     declare email: string;
 
     @Validate({
-        len: 
-        {
-            msg: "The password must be of 7 caracters length at minimum",
+        len: {
+            msg: "The pseudo can't have more than 50 characters",
+            args: [1, 50]
+        },
+        is: {
+            msg: "Pseudo must begin with '@'",
+            args: /^@.*$/
+        }
+    })
+    @Column({
+        type: DataType.STRING,
+        allowNull: false
+    })
+    declare pseudo: string;
+
+    @Validate({
+        len: {
+            msg: "The password must be of 7 caracters length minimum",
             args: [7, 244]
-            
         }
     })
     @Column({
@@ -109,8 +123,8 @@ class User extends Model
     declare address: NonAttribute<Address>;
 
 
-    declare setSex: BelongsToSetAssociationMixin<Sex, User['idSex']>;
-    declare setAddress: BelongsToSetAssociationMixin<Address, User['idAddress']>;
+    declare setSex: BelongsToSetAssociationMixin<Sex, Sex['id']>;
+    declare setAddress: BelongsToSetAssociationMixin<Address, Address['id']>;
 }
 
 export default User;
