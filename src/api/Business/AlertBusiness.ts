@@ -27,9 +27,8 @@ export class AlertBusiness {
      * Return all alerts
      * @returns Alerts
      */
-    public async getAllAlerts()
-    {
-        const alerts = await Alert.findAndCountAll().then();
+    public async getAllAlerts() {
+        const alerts = await Alert.findAndCountAll();
         return alerts;
     }
 
@@ -39,7 +38,7 @@ export class AlertBusiness {
      * @returns Alert|null
      */
     public async getAlertById(id: number) {
-        let alert: Alert|null = await Alert.findByPk(id).then();
+        let alert: Alert | null = await Alert.findByPk(id);
         return alert;
     }
 
@@ -48,12 +47,12 @@ export class AlertBusiness {
      * @param idAlert 
      */
     public async deleteAlert(idAlert: number) {
-        await Alert.findByPk(idAlert).then((alert: Alert) => {
-            if (alert) {
-                return alert.destroy();
-            } else {
-                throw new CustomError("Alert not found");
-            }
-        })
+        const alert: Alert = await Alert.findByPk(idAlert);
+        if (alert) {
+            return alert.destroy();
+        } else {
+            throw new CustomError("Alert not found");
+        }
     }
+
 }

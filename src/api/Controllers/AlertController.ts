@@ -1,3 +1,4 @@
+import Alert from "database/models/Alert";
 import { AlertBusiness } from "../../api/Business/AlertBusiness";
 import express, { Router, Request, Response } from "express";
 
@@ -5,21 +6,19 @@ import express, { Router, Request, Response } from "express";
 const router: Router = express.Router();
 const alertBusiness: AlertBusiness = new AlertBusiness();
 
-router.get('/', (req: Request, res: Response) => {
-    alertBusiness.getAllAlerts().then((result) => {
-        res.json({
-            total_items: result.count,
-            alerts: result.rows
-        })
+router.get('/', async (req: Request, res: Response) => {
+    const result: { rows: Alert[], count: number } = await alertBusiness.getAllAlerts();
+    res.json({
+        total_items: result.count,
+        alerts: result.rows
     })
 })
 
-router.get('/:id', (req: Request, res: Response, next) => {
+router.get('/:id', async (req: Request, res: Response, next) => {
     try {
-        alertBusiness.getAlertById(parseInt(req.params.id)).then((alert) => {
-            res.json(alert);
-        })
-    } catch(err) {
+        const alert: Alert = await alertBusiness.getAlertById(parseInt(req.params.id));
+        res.json(alert);
+    } catch (err) {
         next(err);
     }
 })
