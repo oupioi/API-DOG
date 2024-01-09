@@ -6,6 +6,7 @@ import { AddressBusiness } from "./AddressBusiness";
 import { CustomError } from "../../api/Tools/ErrorHandler";
 import bcryptjs from "bcryptjs";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
+import { Op } from "sequelize";
 
 export class UserBusiness {
     private addressBusiness: AddressBusiness
@@ -20,32 +21,34 @@ export class UserBusiness {
      * @returns Promise<User>
      * @throws CustomError
      */
-    public async createUser(userDto: UserDTO): Promise<User>
+    public async createUser(userDto: UserDTO): Promise<string>
     {
         // Creates address first
         const address: Address = await this.addressBusiness.createAddress(userDto.address);
 
         const hPassword: string = await bcryptjs.hash(userDto.password, 10);
-        const newUser = User.findOrCreate({
-            where: {email: userDto.email},
-            defaults: {
-                email: userDto.email,
-                password: hPassword,
-                firstName: userDto.firstName,
-                lastName: userDto.lastName,
-                birthdate: userDto.birthdate,
-                notifyFriends: userDto.notifyFriends,
-                idSex: userDto.sex.id,
-                idAddress: address.id
-            },
-            include: [Address, Sex]
-        }).then(([user, created]) => {
-            if (!created) {
-                throw new CustomError("This email is already linked to an account");
-            }
-            return user;
+        const existingUser = await User.findOne({
+            where: {email: userDto.email}
         });
-        return newUser;
+        if (existingUser) {
+            console.log(existingUser);
+            
+            throw new CustomError("This email is already used");
+        }
+
+        let newUser: User = new User({
+            pseudo:         userDto.pseudo,
+            email:          userDto.email,
+            password:       hPassword,
+            firstName:      userDto.firstName,
+            lastName:       userDto.lastName,
+            birthdate:      userDto.birthdate,
+            notifyFriends:  userDto.notifyFriends,
+            idSex:          userDto.sex.id,
+            idAddress:      address.id
+        });
+        await newUser.save();
+        return TokenHandler.create(newUser.id);
     }
 
     /**
@@ -75,7 +78,6 @@ export class UserBusiness {
      * @throws CustomError
      */
     public async modifyUser(userDto: UserDTO): Promise<User> {
-        /** @todo En dûr pour l'instant, récupéré du token par la suite */
         if (TokenHandler.tokenUserId != userDto.id) {
             throw new CustomError('Access forbidden', 403);
         }
@@ -103,26 +105,29 @@ export class UserBusiness {
             user.password = hPassword;
         }
         user.email = userDto.email;
+        user.pseudo = userDto.pseudo;
         user.firstName = userDto.firstName;
         user.lastName = userDto.lastName;
         user.birthdate = userDto.birthdate;
         user.notifyFriends = userDto.notifyFriends;
         user.idSex = userDto.sex.id;
-        this.addressBusiness.modifyUserAddress(user.address, userDto.address).then();
+        await this.addressBusiness.modifyUserAddress(user.address, userDto.address);
 
         await user.save();
         return user;
     }
 
     /**
-     * 
+     * Check the user id in token and the id given, if they match, delete the user
      * @param id User id
      * @throws CustomError()
      */
     public async deleteUser(id: number)
     {
-        /** @todo Check dans le token que c'est le bon utilisateur */
-        await User.findByPk(id).then((user: User) => {
+        if (TokenHandler.tokenUserId !== id) {
+            throw new CustomError("Can't delete a user you are not", 403);
+        }
+        User.findByPk(id).then((user: User) => {
             if (user) {
                 return user.destroy();
             } else {
@@ -143,7 +148,7 @@ export class UserBusiness {
             where: {
                 email: userDto.email
             },
-            attributes: ["password"]
+            attributes: ["password", "id"]
         });
         if (!user) {
             throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
@@ -153,5 +158,21 @@ export class UserBusiness {
             return TokenHandler.create(user.id);
         }
         throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
+    }
+
+    public async searchUserByPseudo(query: string)
+    {
+        if (query.length <= 1) {
+            throw new CustomError("Query must be of at least 2 caracters in order to search");
+        }
+        const users: { rows: User[]; count: number; } = await User.findAndCountAll({
+            where: {
+                pseudo: {
+                    [Op.like]: `${query}%`
+                }
+            },
+            limit: 10
+        });
+        return users;
     }
 }
