@@ -1,8 +1,10 @@
+import { BreedDTO } from "./BreedDTO";
+
 export class DogDTO 
 {
     id?: number;
 
-    breed: string;
+    breed: BreedDTO;
 
     name: string;
 
