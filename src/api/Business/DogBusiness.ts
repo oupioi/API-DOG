@@ -3,6 +3,7 @@ import Dog from "../../database/models/Dog";
 import User from "../../database/models/User";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
 import { CustomError } from "../../api/Tools/ErrorHandler";
+import Breed from "../../database/models/Breed";
 
 export class DogBusiness {
 
@@ -14,7 +15,7 @@ export class DogBusiness {
     public async createDog(dogDto: DogDTO)
     {
         let newDog: Dog = new Dog({
-            breed:      dogDto.breed,
+            idBreed:    dogDto.breed.id,
             name:       dogDto.name,
             weight:     dogDto.weight,
             sex:        dogDto.sex,
@@ -31,7 +32,7 @@ export class DogBusiness {
      */
     public async getAllDogs()
     {
-        const dogs = await Dog.findAndCountAll();
+        const dogs = await Dog.findAndCountAll({include: {model: Breed, as: "breed"}});
         return dogs;
     }
 
@@ -45,7 +46,8 @@ export class DogBusiness {
     {
         const dog = await Dog.findByPk(id, {
             include: [
-                {model: User, as: "user", attributes: ["pseudo", "firstName", "lastName"]}
+                {model: User, as: "user", attributes: ["pseudo", "firstName", "lastName"]},
+                {model: Breed, as: "breed"}
             ]
         });
         if (!dog) {
@@ -79,7 +81,7 @@ export class DogBusiness {
         if (!dog) {
             throw new CustomError("Not found", 404);
         }
-        dog.breed       = dogDto.breed;
+        dog.idBreed     = dogDto.breed.id;
         dog.name        = dogDto.name;
         dog.weight      = dogDto.weight;
         dog.sex         = dogDto.sex;
