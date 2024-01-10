@@ -48,7 +48,6 @@ class Park extends Model
     })
     declare address: NonAttribute<Address>;
 
-    declare setAddress: BelongsToSetAssociationMixin<Address, Park['idAddress']>;
 }
 
 export default Park;

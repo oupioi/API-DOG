@@ -36,7 +36,9 @@ router.get('/search/:zip_code', async (req: Request, res: Response, next) => {
     }
 })
 
-//A DEPLACER DANS LE CONTROLLER ADMIN
+/**
+ * @todo à déplacer dans le controller admin
+ */
 router.post('/', async (req: Request, res: Response, next) => {
     try {
         const parkDto: ParkDTO = plainToInstance(ParkDTO, req.body);

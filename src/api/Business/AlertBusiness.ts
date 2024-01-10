@@ -6,7 +6,7 @@ export class AlertBusiness {
     /**
      * Create new alert
      * @param alertDto 
-     * @returns PromiseAlert>
+     * @returns Promise<Alert>
      * @throws CustomError
      */
     public async createAlert(alertDto: AlertDTO): Promise<Alert> {
@@ -54,5 +54,4 @@ export class AlertBusiness {
             throw new CustomError("Alert not found");
         }
     }
-
 }
