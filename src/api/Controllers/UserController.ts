@@ -64,10 +64,17 @@ router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next
     }
 });
 
-router.delete('/:id', TokenHandler.handle, (req: Request, res: Response, next: NextFunction) => {
-    userBusiness.deleteUser(parseInt(req.params.id)).then((result: void) => {
-        res.status(204);
-    }).catch((err) => {next(err);});
+router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user: void = await userBusiness.deleteUser(parseInt(req.params.id));
+
+        res.status(200).json({
+            message: "User deleted"
+        });
+    } catch (error) {
+        next(error);
+    }
+
 });
 
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {

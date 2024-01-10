@@ -7,6 +7,7 @@ import { CustomError } from "../../api/Tools/ErrorHandler";
 import bcryptjs from "bcryptjs";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
 import { Op } from "sequelize";
+import Dog from "../../database/models/Dog";
 
 export class UserBusiness {
     private addressBusiness: AddressBusiness
@@ -31,8 +32,6 @@ export class UserBusiness {
             where: {email: userDto.email}
         });
         if (existingUser) {
-            console.log(existingUser);
-            
             throw new CustomError("This email is already used");
         }
 
@@ -57,7 +56,7 @@ export class UserBusiness {
      */
     public async getAllUsers()
     {
-        const users = await User.findAndCountAll().then();
+        const users = await User.findAndCountAll();
         return users;
     }
 
@@ -68,7 +67,10 @@ export class UserBusiness {
      */
     public async getUserById(id: number)
     {
-        let user: User|null = await User.findByPk(id).then();
+        let user: User|null = await User.findByPk(id);
+        if (!user) {
+            throw new CustomError('No user found', 404);
+        }
         return user;
     }
 
@@ -120,20 +122,31 @@ export class UserBusiness {
     /**
      * Check the user id in token and the id given, if they match, delete the user
      * @param id User id
-     * @throws CustomError()
+     * @throws CustomError
      */
     public async deleteUser(id: number)
     {
         if (TokenHandler.tokenUserId !== id) {
             throw new CustomError("Can't delete a user you are not", 403);
         }
-        User.findByPk(id).then((user: User) => {
-            if (user) {
-                return user.destroy();
-            } else {
-                throw new CustomError("User not found");
-            }
-        });
+
+        const user: User = await User.findByPk(id, {include: {model: Dog, as: "dogs"}});
+        if (user) {
+            await Dog.destroy({
+                where: {
+                    idUser: id
+                }
+            });
+            await user.destroy();
+            await Address.destroy({
+                where: {
+                    id: user.address.id
+                }
+            });
+            return;
+        } else {
+            throw new CustomError("User not found", 404);
+        }
     }
 
     /**
