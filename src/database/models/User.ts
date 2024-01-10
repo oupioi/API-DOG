@@ -5,11 +5,13 @@ import {
     DataType,
     ForeignKey,
     BelongsTo,
-    Validate
+    Validate,
+    HasMany
 } from "sequelize-typescript";
 import Address from "./Address";
 import Sex from "./Sex";
 import { BelongsToSetAssociationMixin, NonAttribute, Op } from "sequelize";
+import Dog from "./Dog";
 
 @Table({
     timestamps: false,
@@ -122,6 +124,11 @@ class User extends Model
     })
     declare address: NonAttribute<Address>;
 
+    @HasMany(() => Dog, {
+        foreignKey: 'idUser',
+        onDelete: "CASCADE"
+    })
+    declare dogs: Dog[];
 
     declare setSex: BelongsToSetAssociationMixin<Sex, Sex['id']>;
     declare setAddress: BelongsToSetAssociationMixin<Address, Address['id']>;
