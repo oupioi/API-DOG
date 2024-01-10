@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
 import { DogBusiness } from "../../api/Business/DogBusiness";
+import { CheckNumber } from "../../api/Tools/CheckInt";
 
 const router: Router = express.Router();
 const dogBusiness: DogBusiness = new DogBusiness();
@@ -20,7 +21,7 @@ router.get('/',  TokenHandler.handle, async (req: Request, res: Response, next:N
     }
 });
 
-router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:id', CheckNumber.CheckintID, TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const dog: Dog = await dogBusiness.getDog(parseInt(req.params.id));
         res.json(dog);
@@ -29,7 +30,7 @@ router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next
     }
 });
 
-router.get('/user/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/user/:id', CheckNumber.CheckintID, TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const dogs: { count: number, rows: Dog[] } = await dogBusiness.getDogByUser(parseInt(req.params.id));
         res.json({
@@ -41,7 +42,7 @@ router.get('/user/:id', TokenHandler.handle, async (req: Request, res: Response,
     }
 });
 
-router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', CheckNumber.CheckintID, TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const dogDto = plainToInstance(DogDTO, req.body);
         const dog: Dog = await dogBusiness.modifyDog(dogDto);
@@ -62,7 +63,7 @@ router.post('/', TokenHandler.handle, async (req: Request, res: Response, next: 
     }
 })
 
-router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', CheckNumber.CheckintID, TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         await dogBusiness.deleteDog(parseInt(req.params.id));
         res.status(200).json({

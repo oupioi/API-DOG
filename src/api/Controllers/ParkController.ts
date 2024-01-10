@@ -3,6 +3,8 @@ import { ParkBusiness } from "../../api/Business/ParkBusiness";
 import Park from "../../database/models/Park";
 import express, { Router, Request, Response } from "express";
 import { plainToInstance } from "class-transformer";
+import { CheckNumber } from "../../api/Tools/CheckInt";
+
 
 const router: Router = express.Router();
 const parkBusiness: ParkBusiness = new ParkBusiness();
@@ -15,7 +17,7 @@ router.get('/', async (req: Request, res: Response) => {
     })
 })
 
-router.get('/:id', async (req:Request, res: Response, next) => {
+router.get('/:id',CheckNumber.CheckintID,  async (req:Request, res: Response, next) => {
     try {
         const park: Park = await parkBusiness.getParkById(parseInt(req.params.id));
         res.json(park)
@@ -24,7 +26,7 @@ router.get('/:id', async (req:Request, res: Response, next) => {
     }
 })
 
-router.get('/search/:zip_code', async (req: Request, res: Response, next) => {
+router.get('/search/:zip_code',CheckNumber.CheckintZipCode, async (req: Request, res: Response, next) => {
     try {
         const result: {rows: Park[], count: number} = await parkBusiness.getParkByZipCode(parseInt(req.params.zip_code));
         res.json({
