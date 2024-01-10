@@ -2,14 +2,23 @@ import {
     Table,
     Column,
     Model,
-    DataType
+    DataType,
+    ForeignKey,
+    BelongsTo
 } from "sequelize-typescript";
+import User from "./User";
+import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
 
 @Table({
     timestamps: false,
     tableName: "dog",
     modelName: "Dog",
-    underscored: true
+    underscored: true,
+    defaultScope: {
+        attributes: {
+            exclude: ["idUser"]
+        }
+    }
 })
 class Dog extends Model
 {
@@ -49,6 +58,19 @@ class Dog extends Model
         allowNull: false
     })
     declare birthdate: Date;
+
+
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare idUser: number;
+
+    @BelongsTo(() => User)
+    declare user: NonAttribute<User>;
+
+    declare setUser: BelongsToSetAssociationMixin<User, User['id']>;
 }
 
 export default Dog;
