@@ -4,10 +4,6 @@ import { CustomError } from "../../api/Tools/ErrorHandler";
 
 
 export class FriendBusiness {
-
-    public constructor () {
-    }
-
     /**
      * 
      * @param friendDto FriendDTO
