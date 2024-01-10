@@ -10,6 +10,7 @@ import Sex from "./database/models/Sex";
 import sequelize from './database/connection';
 import apiRouter from './api/ApiRouter';
 import { CustomError, ErrorHandler } from './api/Tools/ErrorHandler';
+import { ValidationError } from 'sequelize';
 
 sequelize.sync().then(() => {
     console.log('Tables syncronisées');
@@ -34,11 +35,22 @@ app.post("/sex", async (req, res) => {
 app.use("/api", apiRouter);
 
 /** CustomError handler */
-app.use(function (err: Error, req: Request, res: Response, next: any) {
+app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
     const handler: ErrorHandler = new ErrorHandler();
     if (err instanceof CustomError) {
         const json = handler.handle(err);
         res.status(json.code).json(json);
+    }else {
+        next(err);
+    }
+})
+
+app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
+    if (err instanceof ValidationError) {
+        res.status(500).json({
+            code: 500,
+            message: err.message
+        });
     }else {
         next(err);
     }

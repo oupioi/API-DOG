@@ -1,26 +1,42 @@
 import { UserDTO } from "../RequestBodies/UserDTO";
 import User from "../../database/models/User";
-import express, { Request, Response, Router } from "express";
+import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { UserBusiness } from "../Business/UserBusiness";
+import { TokenHandler } from "../../api/Tools/TokenHandler";
 
 const router: Router = express.Router();
 const userBusiness: UserBusiness = new UserBusiness();
 
-router.get('/', (req: Request, res: Response) => {
-    userBusiness.getAllUsers().then((result) => {
+router.get('/',  TokenHandler.handle, async (req: Request, res: Response, next:NextFunction) => {
+    try {
+        const users: { rows: User[]; count: number; } = await userBusiness.getAllUsers();
         res.json({
-            total_items: result.count,
-            users: result.rows
+            total_items: users.count,
+            users: users.rows
         });
-    })
+    } catch (error) {
+        next(error);
+    }
+    
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/search/:query', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
-        userBusiness.getUserById(parseInt(req.params.id)).then((user) => {
-            res.json(user);
-        })
+        const users: { rows: User[]; count: number; } = await userBusiness.searchUserByPseudo(req.params.query);
+            res.json({
+                total_items: users.count,
+                users: users.rows
+            });
+    }catch(err) {
+        next(err);
+    }
+});
+
+router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user: User|void = await userBusiness.getUserById(parseInt(req.params.id))
+        res.json(user);
     }catch(err) {
         next(err);
     }
@@ -29,19 +45,17 @@ router.get('/:id', (req, res, next) => {
 router.post("/", async (req: Request, res: Response, next) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
-        const newUser: User = await userBusiness.createUser(userDto);
-        User.findByPk(newUser.id).then((user: User) => {
-            res.json(user);
-        })
+        const token: string = await userBusiness.createUser(userDto);
+
+        res.status(201).json({token: token});
     } catch (error) {
         next(error);
     }
 });
 
-router.put('/:id', async (req: Request, res: Response, next) => {
+router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
-        //Ajouter un middleware pour check si c'est bien le bon utilisateur (dans le token) et/ou mettre uuid
         const user: User = await userBusiness.modifyUser(userDto);
         const userFound: User = await User.findByPk(user.id);
         res.json(userFound);
@@ -50,10 +64,29 @@ router.put('/:id', async (req: Request, res: Response, next) => {
     }
 });
 
-router.delete('/:id', (req: Request, res: Response, next) => {
-    userBusiness.deleteUser(parseInt(req.params.id)).then((result: void) => {
-        res.status(204);
-    }).catch((err) => {next(err);});
+router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user: void = await userBusiness.deleteUser(parseInt(req.params.id));
+
+        res.status(200).json({
+            message: "User deleted"
+        });
+    } catch (error) {
+        next(error);
+    }
+
+});
+
+router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userDto: UserDTO = plainToInstance(UserDTO, req.body);
+        const token = await userBusiness.login(userDto);
+        res.status(200).json({
+            token: token
+        });
+    } catch (error) {
+        next(error);
+    }
 });
 
 export default router;

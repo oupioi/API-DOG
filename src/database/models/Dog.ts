@@ -2,14 +2,24 @@ import {
     Table,
     Column,
     Model,
-    DataType
+    DataType,
+    ForeignKey,
+    BelongsTo
 } from "sequelize-typescript";
+import User from "./User";
+import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
+import Breed from "./Breed";
 
 @Table({
     timestamps: false,
     tableName: "dog",
     modelName: "Dog",
-    underscored: true
+    underscored: true,
+    defaultScope: {
+        attributes: {
+            exclude: ["id_user", "id_breed", "idUser", "idBreed"]
+        }
+    }
 })
 class Dog extends Model
 {
@@ -19,12 +29,6 @@ class Dog extends Model
         autoIncrement: true
     })
     declare id: number;
-
-    @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
-    declare breed: string;
 
     @Column({
         type: DataType.STRING,
@@ -49,6 +53,35 @@ class Dog extends Model
         allowNull: false
     })
     declare birthdate: Date;
+
+
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare idUser: number;
+
+    @BelongsTo(() => User, {
+        foreignKey: "id_user"
+    })
+    declare user: NonAttribute<User>;
+    
+
+    @ForeignKey(() => Breed)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare idBreed: number;
+
+    @BelongsTo(() => Breed, {
+        foreignKey: 'id_breed'
+    })
+    declare breed: NonAttribute<Breed>;
+
+    declare setUser: BelongsToSetAssociationMixin<User, User['id']>;
+    declare setBreed: BelongsToSetAssociationMixin<Breed, Breed['id']>;
 }
 
 export default Dog;
