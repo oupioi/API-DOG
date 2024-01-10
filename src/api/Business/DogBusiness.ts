@@ -15,13 +15,14 @@ export class DogBusiness {
     public async createDog(dogDto: DogDTO)
     {
         let newDog: Dog = new Dog({
-            idBreed:    dogDto.breed.id,
             name:       dogDto.name,
             weight:     dogDto.weight,
             sex:        dogDto.sex,
             birthdate:  dogDto.birthdate,
-            idUser:     TokenHandler.tokenUserId
+            idUser:     TokenHandler.tokenUserId,
+            idBreed:    dogDto.breed.id
         });
+        
         await newDog.save();
         return await this.getDog(newDog.id);
     }
@@ -88,7 +89,7 @@ export class DogBusiness {
         dog.birthdate   = dogDto.birthdate;
 
         await dog.save();
-        return await Dog.findByPk(dog.id);
+        return await Dog.findByPk(dog.id, {include: { model: Breed, as: "breed"}});
     }
 
     public async getDogByUser(userId: number)

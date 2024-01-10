@@ -1,6 +1,8 @@
-import Breed from "database/models/Breed";
-import { CustomError } from "api/Tools/ErrorHandler";
-import { BreedService } from "api/Services/BreedService";
+import Breed from "../../database/models/Breed";
+import { CustomError } from "../../api/Tools/ErrorHandler";
+import { BreedService } from "../../api/Services/BreedService";
+import { DogApiDTO } from "../../api/Services/ResponseBodies/DogApiDTO";
+import { plainToInstance } from "class-transformer";
 
 export class BreedBusiness {
 
@@ -40,6 +42,21 @@ export class BreedBusiness {
      */
     public async importBreeds()
     {
-        // appel au service
+        let breeds: any[] = [];
+
+        const response: DogApiDTO = await this.breedService.getBreedsFromApi();
+        const responseDto = plainToInstance(DogApiDTO, response);
+
+        for (const key in responseDto.message) {
+            breeds.push({ name: key.charAt(0).toUpperCase() + key.slice(1)});
+            
+            responseDto.message[key].forEach((subBreed: string) => {
+                breeds.push({name: `${subBreed.charAt(0).toUpperCase() + subBreed.slice(1)} ${key}`});
+            });
+        }
+
+        await Breed.bulkCreate(breeds);
+
+        return Breed.findAndCountAll();
     }
 }

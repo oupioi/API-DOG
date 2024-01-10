@@ -17,7 +17,7 @@ import Breed from "./Breed";
     underscored: true,
     defaultScope: {
         attributes: {
-            exclude: ["idUser", "idBreed"]
+            exclude: ["id_user", "id_breed", "idUser", "idBreed"]
         }
     }
 })
@@ -62,7 +62,9 @@ class Dog extends Model
     })
     declare idUser: number;
 
-    @BelongsTo(() => User)
+    @BelongsTo(() => User, {
+        foreignKey: "id_user"
+    })
     declare user: NonAttribute<User>;
     
 
@@ -73,7 +75,9 @@ class Dog extends Model
     })
     declare idBreed: number;
 
-    @BelongsTo(() => Breed)
+    @BelongsTo(() => Breed, {
+        foreignKey: 'id_breed'
+    })
     declare breed: NonAttribute<Breed>;
 
     declare setUser: BelongsToSetAssociationMixin<User, User['id']>;
