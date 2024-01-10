@@ -21,6 +21,19 @@ router.get("/:id", (req: Request, res: Response) => {
     }
 });
 
+/**
+ * Route to search one friend
+ */
+router.get("/:id1/:id2",(req: Request, res: Response) => {
+    try{
+        friendBusiness.getfriend(parseInt(req.params.id1), parseInt(req.params.id2)).then((result : Friend) => {
+            res.json(result);
+        }
+        ).catch((err) => {throw err; });
+    }catch(err){
+        throw err;
+    }
+});
 
 
 /**
@@ -67,7 +80,7 @@ router.post("/reject/:id1/:id2", (req: Request, res: Response, next) => {
  * Route to delete a friend
  */
 router.delete("/:id1/:id2", (req: Request, res: Response, next) => {
-    friendBusiness.deletefriend(parseInt(req.params.id1), parseInt(req.params.id2)).then((result: Friend) => {
+    friendBusiness.deletefriend(parseInt(req.params.id1), parseInt(req.params.id2)).then((result: string) => {
         res.status(204);
     }
     ).catch((err) => { next(err); });

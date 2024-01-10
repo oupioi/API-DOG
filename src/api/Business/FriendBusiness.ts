@@ -41,6 +41,24 @@ export class FriendBusiness {
         return friends;
     }
 
+
+    /**
+     * 
+     * @param id1 User id 1
+     * @param id2 User id 2
+     * @returns Friend
+     */
+    public async getfriend(id1: number,  id2: number)
+    {
+        const friend: Friend = await Friend.findOne({
+            where :{
+                userId1 : id1,
+                userId2 : id2,
+            }
+        })
+        return friend;
+    }
+
     /**
      * 
      * @param userId1 User who send the request
@@ -103,6 +121,6 @@ export class FriendBusiness {
             throw new CustomError("friend not found");
         }
         await friend.destroy();
-        return friend;
+        return  "friend deleted";
     }
 }
