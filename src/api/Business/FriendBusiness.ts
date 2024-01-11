@@ -9,7 +9,7 @@ export class FriendBusiness {
      * @param friendDto FriendDTO
      * @returns The new friend
      */
-    public async createfriend(friendDto: FriendDTO): Promise<Friend>
+    public async createFriendRequest(friendDto: FriendDTO): Promise<Friend>
     {
         const newfriend = Friend.create({
             userId1: friendDto.userId1,
@@ -42,9 +42,9 @@ export class FriendBusiness {
      * 
      * @param id1 User id 1
      * @param id2 User id 2
-     * @returns Friend
+     * @returns Relation between the two users
      */
-    public async getfriend(id1: number,  id2: number)
+    public async getFriendship(id1: number,  id2: number)
     {
         const friend: Friend = await Friend.findOne({
             where :{
@@ -61,19 +61,21 @@ export class FriendBusiness {
      * @param userId2 User who receive the request
      * @returns The new friend
      */
-    public async updatefriend(userId1: number,userId2: number): Promise<Friend>
-    {
-        const friend: Friend|null = await Friend.findOne({
-            where :{
+    public async acceptFriendRequest(userId1: number, userId2: number): Promise<Friend> {
+        const friend: Friend | null = await Friend.findOne({
+            where: {
                 userId1: userId1,
                 userId2: userId2
-            }  
-        })
-        if (friend === null) {
-            throw new CustomError("friend not found");
+            }
+        });
+
+        if (!friend) {
+            throw new CustomError("Friend not found");
         }
+
         friend.status = "accepted";
         await friend.save();
+
         return friend;
     }
 
@@ -83,7 +85,7 @@ export class FriendBusiness {
      * @param userId2 User who receive the request
      * @returns The rejected friend
      */
-    public async rejectfriend(userId1: number,userId2: number): Promise<Friend>
+    public async rejectFriendRequest(userId1: number,userId2: number): Promise<Friend>
     {
         const friend: Friend|null = await Friend.findOne({
             where :{
@@ -106,7 +108,7 @@ export class FriendBusiness {
      * @param userId2 User who receive the request
      * @returns Error if the request doesn't exist or the request deleted
      */
-    public async deletefriend(userId1: number,userId2: number) {
+    public async deleteFriend(userId1: number,userId2: number) {
         const friend: Friend|null = await Friend.findOne({
             where :{
                 userId1: userId1,
@@ -117,6 +119,6 @@ export class FriendBusiness {
             throw new CustomError("friend not found");
         }
         await friend.destroy();
-        return  "friend deleted";
+        return;
     }
 }

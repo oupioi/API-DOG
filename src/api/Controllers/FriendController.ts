@@ -10,26 +10,22 @@ const friendBusiness : FriendBusiness = new FriendBusiness();
 /**
  * Route to search all friend by userId1
  */
-router.get("/:id", (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: Response) => {
     try{
-       friendBusiness.getAllfriend(parseInt(req.params.id)).then((result: Friend[]) => {
-            res.json(result);
-        }
-        ).catch((err) => { throw err; });
+        const friends: Friend[] = await friendBusiness.getAllfriend(parseInt(req.params.id));
+        res.json(friends);
     }catch(err){
         throw err;
     }
 });
 
 /**
- * Route to search one friend
+ * Route to search one relation between two users
  */
-router.get("/:id1/:id2",(req: Request, res: Response) => {
+router.get("/:id1/:id2", async (req: Request, res: Response) => {
     try{
-        friendBusiness.getfriend(parseInt(req.params.id1), parseInt(req.params.id2)).then((result : Friend) => {
-            res.json(result);
-        }
-        ).catch((err) => {throw err; });
+        const realation : Friend = await  friendBusiness.getFriendship(parseInt(req.params.id1), parseInt(req.params.id2));
+        res.json(realation);
     }catch(err){
         throw err;
     }
@@ -42,15 +38,14 @@ router.get("/:id1/:id2",(req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response, next) => {
     try {
         const friendDto: FriendDTO = plainToInstance(FriendDTO, req.body);
-        const newfriend: Friend = await friendBusiness.createfriend(friendDto);
-        Friend.findOne({
+        const newfriend: Friend = await friendBusiness.createFriendRequest(friendDto);
+        const friend : Friend = await Friend.findOne({
             where :{
                 userId1: newfriend.userId1,
                 userId2: newfriend.userId2
             }  
-        }).then((friend: Friend) => {
-            res.json(friend);
         })
+        res.json(friend);
     } catch (error) {
         next(error);
     }
@@ -59,31 +54,36 @@ router.post("/", async (req: Request, res: Response, next) => {
 /**
  * Route to accept a friend
  */
-router.post("/:id1/:id2", (req: Request, res: Response, next) => {
-    friendBusiness.updatefriend(parseInt(req.params.id1), parseInt(req.params.id2)).then((result: Friend) => {
-        res.json(result);
+router.post("/:id1/:id2", async (req: Request, res: Response, next) => {
+    try {
+        const friend : Friend = await friendBusiness.acceptFriendRequest(parseInt(req.params.id1), parseInt(req.params.id2));
+        res.json(friend);
+    } catch (error) {
+        next(error);
     }
-    ).catch((err) => { next(err); });
 });
-
 /**
  * Route to reject a friend
  */
-router.post("/reject/:id1/:id2", (req: Request, res: Response, next) => {
-    friendBusiness.rejectfriend(parseInt(req.params.id1), parseInt(req.params.id2)).then((result: Friend) => {
-        res.json(result);
+router.post("/reject/:id1/:id2", async (req: Request, res: Response, next) => {
+    try {
+        const friend : Friend = await friendBusiness.rejectFriendRequest(parseInt(req.params.id1), parseInt(req.params.id2));
+        res.json(friend);
+    }catch(err){
+        next(err);
     }
-    ).catch((err) => { next(err); });
 });
-
 /**
  * Route to delete a friend
  */
-router.delete("/:id1/:id2", (req: Request, res: Response, next) => {
-    friendBusiness.deletefriend(parseInt(req.params.id1), parseInt(req.params.id2)).then((result: string) => {
-        res.status(204);
+router.delete("/:id1/:id2", async (req: Request, res: Response, next) => {
+    try{
+        const result : void = await friendBusiness.deleteFriend(parseInt(req.params.id1), parseInt(req.params.id2));
+        res.status(200).json({
+            message: "Friendship deleted"
+        });
+    }catch(err){
+        next(err);
     }
-    ).catch((err) => { next(err); });
 });
-
 export default router;
