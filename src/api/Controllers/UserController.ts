@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { UserBusiness } from "../Business/UserBusiness";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
+import { CheckNumber } from "../../api/Tools/CheckInt";
 
 const router: Router = express.Router();
 const userBusiness: UserBusiness = new UserBusiness();
@@ -33,7 +34,7 @@ router.get('/search/:query', TokenHandler.handle, async (req: Request, res: Resp
     }
 });
 
-router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:id', CheckNumber.CheckintID,TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user: User|void = await userBusiness.getUserById(parseInt(req.params.id))
         res.json(user);
@@ -53,7 +54,7 @@ router.post("/", async (req: Request, res: Response, next) => {
     }
 });
 
-router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', CheckNumber.CheckintID, TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
         const user: User = await userBusiness.modifyUser(userDto);
@@ -64,7 +65,7 @@ router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next
     }
 });
 
-router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', CheckNumber.CheckintID, TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user: void = await userBusiness.deleteUser(parseInt(req.params.id));
 
