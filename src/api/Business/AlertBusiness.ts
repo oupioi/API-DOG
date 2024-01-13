@@ -43,6 +43,27 @@ export class AlertBusiness {
     }
 
     /**
+     * Modify an Alert
+     * @param alertDto 
+     * @returns Alert
+     */
+    public async modifyAlert(alertDto: AlertDTO) 
+    {
+        let alert: Alert = await Alert.findByPk(alertDto.id);
+
+        if(!alert) {
+            throw new CustomError("Not found", 404);
+        }
+        alert.title     = alertDto.title;
+        alert.context   = alertDto.context;
+        alert.content   = alertDto.content;
+        alert.zip_code  = alertDto.zip_code;
+
+        await alert.save();
+        return await Alert.findByPk(alert.id);
+    }
+
+    /**
      * Checks if alert exist by the given id, if yes, delete it
      * @param idAlert 
      */
