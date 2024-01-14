@@ -11,14 +11,13 @@ export class FriendBusiness {
      */
     public async createFriendRequest(friendDto: FriendDTO): Promise<Friend>
     {
-        const newfriend = Friend.create({
+        const newfriend = await Friend.create({
             userId1: friendDto.userId1,
             userId2: friendDto.userId2,
             date: friendDto.date,
             status: friendDto.status
-        }).then((friend: Friend) => {
-            return friend;
         });
+
         return newfriend;
     }
 
@@ -70,7 +69,7 @@ export class FriendBusiness {
         });
 
         if (!friend) {
-            throw new CustomError("Friend not found");
+            throw new CustomError("Friend not found", 404);
         }
 
         friend.status = "accepted";
@@ -94,7 +93,7 @@ export class FriendBusiness {
             }  
         })
         if (friend === null) {
-            throw new CustomError("friend not found");
+            throw new CustomError("Friend not found", 404);
         }
         friend.status = "rejected";
         await friend.save();
@@ -116,7 +115,7 @@ export class FriendBusiness {
             }  
         })
         if (friend === null) {
-            throw new CustomError("friend not found");
+            throw new CustomError("Friend not found", 404);
         }
         await friend.destroy();
         return;

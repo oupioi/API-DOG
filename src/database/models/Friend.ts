@@ -3,9 +3,9 @@ import {
     Column,
     Model,
     DataType,
-    PrimaryKey,
     ForeignKey,
-    BelongsTo
+    BelongsTo,
+    PrimaryKey
 } from "sequelize-typescript";
 import User from "./User";
 
@@ -15,10 +15,15 @@ import User from "./User";
     modelName: "Friend",
     underscored: true
 })
-
 class Friend extends Model {
-    
+
     @PrimaryKey
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare id: number;
+
     @ForeignKey(() => User)
     @Column({
         type: DataType.INTEGER,
@@ -26,7 +31,6 @@ class Friend extends Model {
     })
     declare userId1: number;
 
-    @PrimaryKey
     @ForeignKey(() => User)
     @Column({
         type: DataType.INTEGER,

@@ -1,6 +1,6 @@
 import Friend from "../../database/models/Friend";
 import { FriendDTO } from "../../api/RequestBodies/FriendDTO";
-import express, { Request, Response, Router } from "express";
+import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { FriendBusiness } from "../../api/Business/FriendBusiness";
 
@@ -8,32 +8,32 @@ import { FriendBusiness } from "../../api/Business/FriendBusiness";
 const router: Router = express.Router();
 const friendBusiness : FriendBusiness = new FriendBusiness();
 /**
- * Route to search all friend by userId1
+ * Route to search friends of a user by its given id
  */
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
     try{
         const friends: Friend[] = await friendBusiness.getAllfriend(parseInt(req.params.id));
         res.json(friends);
     }catch(err){
-        throw err;
+        next(err);
     }
 });
 
 /**
- * Route to search one relation between two users
+ * Route to search a relation between two users
  */
-router.get("/:id1/:id2", async (req: Request, res: Response) => {
+router.get("/:id1/:id2", async (req: Request, res: Response, next: NextFunction) => {
     try{
         const realation : Friend = await  friendBusiness.getFriendship(parseInt(req.params.id1), parseInt(req.params.id2));
         res.json(realation);
     }catch(err){
-        throw err;
+        next(err);
     }
 });
 
 
 /**
- * Route to create a demande of friend
+ * Route to create a friend request
  */
 router.post("/", async (req: Request, res: Response, next) => {
     try {
