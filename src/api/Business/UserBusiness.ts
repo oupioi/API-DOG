@@ -22,7 +22,7 @@ export class UserBusiness {
      * @returns Promise<User>
      * @throws CustomError
      */
-    public async createUser(userDto: UserDTO): Promise<string>
+    public async createUser(userDto: UserDTO): Promise<{id: number, token: string}>
     {
         // Creates address first
         const address: Address = await this.addressBusiness.createAddress(userDto.address);
@@ -47,7 +47,9 @@ export class UserBusiness {
             idAddress:      address.id
         });
         await newUser.save();
-        return TokenHandler.create(newUser.id);
+        const token: string = TokenHandler.create(newUser.id);
+        
+        return {id: newUser.id, token: token};
     }
 
     /**
@@ -179,7 +181,9 @@ export class UserBusiness {
         }
         const match = await bcryptjs.compare(userDto.password, user.password);
         if (match) {
-            return TokenHandler.create(user.id);
+            const token: string = TokenHandler.create(user.id);
+            
+            return {id: user.id, token: token};
         }
         throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
     }
