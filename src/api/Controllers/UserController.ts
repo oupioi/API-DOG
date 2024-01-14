@@ -13,8 +13,8 @@ router.get('/',  TokenHandler.handle, async (req: Request, res: Response, next:N
     try {
         const users: { rows: User[]; count: number; } = await userBusiness.getAllUsers();
         res.json({
-            total_items: users.count,
-            users: users.rows
+            total_items:    users.count,
+            users:          users.rows
         });
     } catch (error) {
         next(error);
@@ -26,8 +26,8 @@ router.get('/search/:query', TokenHandler.handle, async (req: Request, res: Resp
     try {
         const users: { rows: User[]; count: number; } = await userBusiness.searchUserByPseudo(req.params.query);
             res.json({
-                total_items: users.count,
-                users: users.rows
+                total_items:    users.count,
+                users:          users.rows
             });
     }catch(err) {
         next(err);
@@ -55,9 +55,12 @@ router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next
 router.post("/", async (req: Request, res: Response, next) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
-        const token: string = await userBusiness.createUser(userDto);
+        const user: {id: number, token: string} = await userBusiness.createUser(userDto);
 
-        res.status(201).json({token: token});
+        res.status(201).json({
+            user_id:     user.id,
+            token:  user.token
+        });
     } catch (error) {
         next(error);
     }
@@ -90,9 +93,10 @@ router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, n
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
-        const token = await userBusiness.login(userDto);
+        const user: {id: number, token: string} = await userBusiness.login(userDto);
         res.status(200).json({
-            token: token
+            user_id:    user.id,
+            token:      user.token
         });
     } catch (error) {
         next(error);
