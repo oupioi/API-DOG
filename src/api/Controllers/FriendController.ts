@@ -3,10 +3,12 @@ import { FriendDTO } from "../../api/RequestBodies/FriendDTO";
 import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { FriendBusiness } from "../../api/Business/FriendBusiness";
+import { TokenHandler } from "api/Tools/TokenHandler";
 
 
 const router: Router = express.Router();
 const friendBusiness : FriendBusiness = new FriendBusiness();
+
 /**
  * Route to search friends of a user by its given id
  */

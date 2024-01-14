@@ -1,6 +1,7 @@
 import Friend from "../../database/models/Friend"
 import { FriendDTO } from "../../api/RequestBodies/FriendDTO";
 import { CustomError } from "../../api/Tools/ErrorHandler";
+import { Op } from "sequelize";
 
 
 export class FriendBusiness {
@@ -28,10 +29,13 @@ export class FriendBusiness {
      */
     public async getAllfriend(id: number)
     {
-        const friends: Friend[] = await Friend.findAll({
+        const friends: Friend[]|null = await Friend.findAll({
             where :{
-                userId1: id
-            }  
+                [Op.or]: [
+                    { userId1: id },
+                    { userId2: id }
+                ]
+            }
         })
         return friends;
     }
@@ -45,10 +49,12 @@ export class FriendBusiness {
      */
     public async getFriendship(id1: number,  id2: number)
     {
-        const friend: Friend = await Friend.findOne({
-            where :{
-                userId1 : id1,
-                userId2 : id2,
+        const friend: Friend|null = await Friend.findOne({
+            where: {
+                [Op.or]: [
+                    { userId1: id1, userId2: id2 },
+                    { userId1: id2, userId2: id1 }
+                ]
             }
         })
         return friend;
@@ -63,8 +69,10 @@ export class FriendBusiness {
     public async acceptFriendRequest(userId1: number, userId2: number): Promise<Friend> {
         const friend: Friend | null = await Friend.findOne({
             where: {
-                userId1: userId1,
-                userId2: userId2
+                [Op.or]: [
+                    { userId1: userId1, userId2: userId2 },
+                    { userId1: userId2, userId2: userId1 }
+                ]
             }
         });
 
@@ -87,10 +95,12 @@ export class FriendBusiness {
     public async rejectFriendRequest(userId1: number,userId2: number): Promise<Friend>
     {
         const friend: Friend|null = await Friend.findOne({
-            where :{
-                userId1: userId1,
-                userId2: userId2
-            }  
+            where: {
+                [Op.or]: [
+                    { userId1: userId1, userId2: userId2 },
+                    { userId1: userId2, userId2: userId1 }
+                ]
+            }
         })
         if (friend === null) {
             throw new CustomError("Friend not found", 404);
@@ -109,9 +119,11 @@ export class FriendBusiness {
      */
     public async deleteFriend(userId1: number,userId2: number) {
         const friend: Friend|null = await Friend.findOne({
-            where :{
-                userId1: userId1,
-                userId2: userId2
+            where: {
+                [Op.or]: [
+                    { userId1: userId1, userId2: userId2 },
+                    { userId1: userId2, userId2: userId1 }
+                ]
             }  
         })
         if (friend === null) {
