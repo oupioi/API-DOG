@@ -4,16 +4,29 @@ import {
     Model,
     DataType,
     ForeignKey,
-    BelongsTo
+    BelongsTo,
+    Validate,
+    HasMany
 } from "sequelize-typescript";
 import Address from "./Address";
 import Sex from "./Sex";
+import { BelongsToSetAssociationMixin, NonAttribute, Op } from "sequelize";
+import Dog from "./Dog";
 
 @Table({
     timestamps: false,
     tableName: "user",
     modelName: "User",
-    underscored: true
+    underscored: true,
+    defaultScope: {
+        attributes: {
+            exclude: ['idSex', 'idAddress', 'password', "id_sex", "id_address"]
+        },
+        include: [
+            {model: Address, as: 'address'},
+            {model: Sex, as: 'sex'}
+        ]
+    }
 })
 class User extends Model
 {
@@ -24,17 +37,41 @@ class User extends Model
     })
     declare id: number;
 
+    @Validate({isEmail: {msg: "Incorrect email address"}, notNull: true})
     @Column({
         type: DataType.STRING,
         allowNull: false
     })
     declare email: string;
 
+    @Validate({
+        len: {
+            msg: "The pseudo can't have more than 50 characters",
+            args: [1, 50]
+        },
+        is: {
+            msg: "Pseudo must begin with '@'",
+            args: /^@.*$/
+        }
+    })
+    @Column({
+        type: DataType.STRING,
+        allowNull: false
+    })
+    declare pseudo: string;
+
+    @Validate({
+        len: {
+            msg: "The password must be of 7 caracters length minimum",
+            args: [7, 244]
+        }
+    })
     @Column({
         type: DataType.TEXT,
         allowNull: false
     })
     declare password: string;
+
 
     @Column({
         type: DataType.STRING,
@@ -42,17 +79,20 @@ class User extends Model
     })
     declare firstName: string;
 
+
     @Column({
         type: DataType.STRING,
         allowNull: false
     })
     declare lastName: string;
 
+    @Validate({isDate: {args: true, msg: "The birth date is not a date"}})
     @Column({
         type: DataType.DATE,
         allowNull: false
     })
     declare birthdate: Date;
+
 
     @Column({
         type: DataType.BOOLEAN,
@@ -67,8 +107,9 @@ class User extends Model
     })
     declare idSex: number;
 
-    @BelongsTo(() => Sex)
-    declare sex: Sex;
+    @BelongsTo(() => Sex, 'id_sex')
+    declare sex?: NonAttribute<Sex>;
+
 
     @ForeignKey(() => Address)
     @Column({
@@ -77,8 +118,20 @@ class User extends Model
     })
     declare idAddress: number;
 
-    @BelongsTo(() => Address)
-    declare address: Address;
+
+    @BelongsTo(() => Address, {
+        onDelete: "CASCADE",
+        foreignKey: "id_address"
+    })
+    declare address: NonAttribute<Address>;
+
+    @HasMany(() => Dog, {
+        onDelete: "CASCADE"
+    })
+    declare dogs: Dog[];
+
+    declare setSex: BelongsToSetAssociationMixin<Sex, Sex['id']>;
+    declare setAddress: BelongsToSetAssociationMixin<Address, Address['id']>;
 }
 
 export default User;
