@@ -5,11 +5,13 @@ import {
     DataType,
     ForeignKey,
     BelongsTo,
-    Default
+    Default,
+    BelongsToMany
 } from "sequelize-typescript";
 import Address from "./Address";
 import Sex from "./Sex";
 import User from "./User";
+import EventUser from "./EventUser";
 
 @Table({
     timestamps: false,
@@ -58,15 +60,8 @@ class Event extends Model
     })
     declare date: Date;
 
-    @ForeignKey(() => User)
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: false
-    })
-    declare idUser: number;
-
-    @BelongsTo(() => User)
-    declare user: User;
+    @BelongsToMany(() => User, () => EventUser)
+    sers: User[];
 
     @ForeignKey(() => Address)
     @Column({

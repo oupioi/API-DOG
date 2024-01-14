@@ -6,12 +6,15 @@ import {
     ForeignKey,
     BelongsTo,
     Validate,
-    HasMany
+    HasMany,
+    BelongsToMany
 } from "sequelize-typescript";
 import Address from "./Address";
 import Sex from "./Sex";
 import { BelongsToSetAssociationMixin, NonAttribute, Op } from "sequelize";
 import Dog from "./Dog";
+import Event from "./Event";
+import EventUser from "./EventUser";
 
 @Table({
     timestamps: false,
@@ -123,6 +126,9 @@ class User extends Model
         onDelete: "CASCADE"
     })
     declare address: NonAttribute<Address>;
+
+    @BelongsToMany(() => Event, () => EventUser)
+    events: Event[];
 
     @HasMany(() => Dog, {
         foreignKey: 'idUser',
