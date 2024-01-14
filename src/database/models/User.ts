@@ -23,7 +23,6 @@ import Dog from "./Dog";
             exclude: ['idSex', 'idAddress', 'password', "id_sex", "id_address"]
         },
         include: [
-            {model: Address, as: 'address'},
             {model: Sex, as: 'sex'}
         ]
     }

@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { UserBusiness } from "../Business/UserBusiness";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
+import Address from "../../database/models/Address";
 
 const router: Router = express.Router();
 const userBusiness: UserBusiness = new UserBusiness();
@@ -33,6 +34,15 @@ router.get('/search/:query', TokenHandler.handle, async (req: Request, res: Resp
     }
 });
 
+router.get('/personal-infos/:id', TokenHandler.handle, TokenHandler.isSameUser, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user: User|void = await userBusiness.getUserPersonalInfos(parseInt(req.params.id))
+        res.json(user);
+    }catch(err) {
+        next(err);
+    }
+});
+
 router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user: User|void = await userBusiness.getUserById(parseInt(req.params.id))
@@ -53,11 +63,11 @@ router.post("/", async (req: Request, res: Response, next) => {
     }
 });
 
-router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', TokenHandler.handle, TokenHandler.isSameUser, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
         const user: User = await userBusiness.modifyUser(userDto);
-        const userFound: User = await User.findByPk(user.id);
+        const userFound: User = await User.findByPk(user.id, {include: {model: Address, as:'address'}});
         res.json(userFound);
     } catch (error) {
         next(error);
