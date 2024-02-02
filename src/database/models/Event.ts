@@ -9,9 +9,10 @@ import {
     BelongsToMany
 } from "sequelize-typescript";
 import Address from "./Address";
-import Sex from "./Sex";
 import User from "./User";
 import EventUser from "./EventUser";
+import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
+
 
 @Table({
     timestamps: false,
@@ -27,6 +28,18 @@ class Event extends Model
         autoIncrement: true
     })
     declare id: number;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: false
+    })
+    declare title: string;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: false
+    })
+    declare description: string;
 
     @Column({
         type: DataType.INTEGER,
@@ -61,7 +74,7 @@ class Event extends Model
     declare date: Date;
 
     @BelongsToMany(() => User, () => EventUser)
-    sers: User[];
+    tabUser: User['id'][];
 
     @ForeignKey(() => Address)
     @Column({
@@ -70,8 +83,14 @@ class Event extends Model
     })
     declare idAddress: number;
 
-    @BelongsTo(() => Address)
-    declare address: Address;
+
+    @BelongsTo(() => Address, {
+        onDelete: "CASCADE"
+    })
+    declare address: NonAttribute<Address>; 
+
+    declare setAddress: BelongsToSetAssociationMixin<Address, Address['id']>;
+
 }
 
 export default Event;

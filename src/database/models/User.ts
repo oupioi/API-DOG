@@ -128,7 +128,7 @@ class User extends Model
     declare address: NonAttribute<Address>;
 
     @BelongsToMany(() => Event, () => EventUser)
-    events: Event[];
+    events: Event['id'][];
 
     @HasMany(() => Dog, {
         foreignKey: 'idUser',
