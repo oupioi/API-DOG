@@ -27,11 +27,6 @@ app.use(bodyParser.json());
 
 const server = http.createServer(app);
 
-app.post("/sex", async (req, res) => {
-    const sex = await Sex.create(req.body);
-    return res.status(201).json(sex);
-})
-
 app.use("/api", apiRouter);
 
 /** CustomError handler */
@@ -54,6 +49,13 @@ app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
     }else {
         next(err);
     }
+})
+
+app.use(function (req: Request, res: Response, next: NextFunction) {
+    res.status(404).json({
+        code: 404,
+        message: 'Not found'
+    });
 })
 
 server.listen(3000, () => {
