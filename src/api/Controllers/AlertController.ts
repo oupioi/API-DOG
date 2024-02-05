@@ -65,7 +65,7 @@ router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, n
     try {
         await alertBusiness.deleteAlert(parseInt(req.params.id));
         res.status(200).json({
-            massage: "Alert deleted"
+            message: "Alert deleted"
         })
     } catch (error) {
         next(error);
