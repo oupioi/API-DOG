@@ -10,6 +10,7 @@ import Sex from "./database/models/Sex";
 import sequelize from './database/connection';
 import apiRouter from './api/ApiRouter';
 import { CustomError, ErrorHandler } from './api/Tools/ErrorHandler';
+import { ValidationError } from 'sequelize';
 
 sequelize.sync().then(() => {
     console.log('Tables syncronisées');
@@ -26,15 +27,10 @@ app.use(bodyParser.json());
 
 const server = http.createServer(app);
 
-app.post("/sex", async (req, res) => {
-    const sex = await Sex.create(req.body);
-    return res.status(201).json(sex);
-})
-
 app.use("/api", apiRouter);
 
 /** CustomError handler */
-app.use(function (err: Error, req: Request, res: Response, next: any) {
+app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
     const handler: ErrorHandler = new ErrorHandler();
     if (err instanceof CustomError) {
         const json = handler.handle(err);
@@ -42,6 +38,24 @@ app.use(function (err: Error, req: Request, res: Response, next: any) {
     }else {
         next(err);
     }
+})
+
+app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
+    if (err instanceof ValidationError) {
+        res.status(500).json({
+            code: 500,
+            message: err.message
+        });
+    }else {
+        next(err);
+    }
+})
+
+app.use(function (req: Request, res: Response, next: NextFunction) {
+    res.status(404).json({
+        code: 404,
+        message: 'Not found'
+    });
 })
 
 server.listen(3000, () => {
