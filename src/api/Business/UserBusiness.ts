@@ -22,7 +22,7 @@ export class UserBusiness {
      * @returns Promise<User>
      * @throws CustomError
      */
-    public async createUser(userDto: UserDTO): Promise<string>
+    public async createUser(userDto: UserDTO): Promise<{id: number, token: string}>
     {
         // Creates address first
         const address: Address = await this.addressBusiness.createAddress(userDto.address);
@@ -47,7 +47,9 @@ export class UserBusiness {
             idAddress:      address.id
         });
         await newUser.save();
-        return TokenHandler.create(newUser.id);
+        const token: string = TokenHandler.create(newUser.id);
+        
+        return {id: newUser.id, token: token};
     }
 
     /**
@@ -56,7 +58,11 @@ export class UserBusiness {
      */
     public async getAllUsers()
     {
-        const users = await User.findAndCountAll();
+        const users = await User.findAndCountAll({
+            attributes: {
+                exclude: ['notifyFriends', 'email', 'birthdate']
+            }
+        });
         return users;
     }
 
@@ -67,10 +73,20 @@ export class UserBusiness {
      */
     public async getUserById(id: number)
     {
-        let user: User|null = await User.findByPk(id);
+        let user: User|null = await User.findByPk(id, {
+            attributes: {
+                exclude: ['notifyFriends', 'email', 'birthdate', 'id']
+            }
+        });
         if (!user) {
             throw new CustomError('No user found', 404);
         }
+        return user;
+    }
+
+    public async getUserPersonalInfos(id: number)
+    {
+        const user: User = await User.findByPk(id, {include: {all:true}});
         return user;
     }
 
@@ -80,16 +96,13 @@ export class UserBusiness {
      * @throws CustomError
      */
     public async modifyUser(userDto: UserDTO): Promise<User> {
-        if (TokenHandler.tokenUserId != userDto.id) {
-            throw new CustomError('Access forbidden', 403);
-        }
-        
         let user: User = await User.findByPk(
             userDto.id,
             {
                 attributes: {
                     include: ["password"]
-                }
+                },
+                include: {model: Address, as:'address'}
             }
         );
         if (!user) {
@@ -168,7 +181,9 @@ export class UserBusiness {
         }
         const match = await bcryptjs.compare(userDto.password, user.password);
         if (match) {
-            return TokenHandler.create(user.id);
+            const token: string = TokenHandler.create(user.id);
+            
+            return {id: user.id, token: token};
         }
         throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
     }

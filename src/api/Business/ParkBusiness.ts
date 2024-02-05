@@ -51,20 +51,6 @@ export class ParkBusiness {
     }
 
     /**
-     * Delete a park by its id
-     * @param id Park id
-     * @throws CustomError()
-     */
-    public async deletePark(id: number) {
-        const park: Park = await Park.findByPk(id);
-        if (park) {
-            return park.destroy();
-        } else {
-            throw new CustomError("Park not found");
-        }
-    }
-
-    /**
      * Get parks by zip_code address
      * @param zip_code 
      * @returns List of parks
@@ -82,5 +68,41 @@ export class ParkBusiness {
             }]
         });
         return parks;
+    }
+
+    /**
+     * Modify a park
+     * @param parkDto 
+     * @returns Park
+     */
+    public async modifyPark(parkDto: ParkDTO) 
+    {
+        const address: Address = await this.addressBusiness.createAddress(parkDto.address);
+        let park: Park = await Park.findByPk(parkDto.id);
+
+        if(!park) {
+            throw new CustomError("Not found", 404);
+        }
+
+        park.name = parkDto.name;
+        park.topography = parkDto.topography;
+        park.idAddress = address.id
+
+        await park.save();
+        return await Park.findByPk(park.id);
+    }
+
+    /**
+     * Delete a park by its id
+     * @param id Park id
+     * @throws CustomError()
+     */
+    public async deletePark(id: number) {
+        const park: Park = await Park.findByPk(id);
+        if (park) {
+            return park.destroy();
+        } else {
+            throw new CustomError("Park not found");
+        }
     }
 }

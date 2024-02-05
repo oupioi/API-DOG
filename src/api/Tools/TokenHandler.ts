@@ -13,7 +13,7 @@ export class TokenHandler
             const decodedToken: string|jwt.JwtPayload = jwt.verify(token, process.env.SECRET_KEY);
             TokenHandler.tokenUserId = TokenHandler.getDocumentProperty(decodedToken, 'id');
         } catch (err) {
-            throw new CustomError("Invalid Token", 403)
+            next(new CustomError("Invalid Token", 403))
         }
         return next();
     }
@@ -24,6 +24,17 @@ export class TokenHandler
             { id: userId }, process.env.SECRET_KEY, {expiresIn: '7d'}
         );
         return token;
+    }
+    
+    static isSameUser(req: Request, res: Response, next: NextFunction)
+    {
+        if(!req.params.id) {
+            next(new CustomError("No identifier given"));
+        }
+        if (parseInt(req.params.id) != TokenHandler.tokenUserId) {
+            next(new CustomError("You can't do that for another user", 403));
+        }
+        return next();
     }
 
     private static getDocumentProperty (object: any, idKey: string) {
@@ -37,6 +48,5 @@ export class TokenHandler
       
         return parseInt('' + result);
       }
-      
       
 }
