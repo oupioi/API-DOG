@@ -3,6 +3,7 @@ import Event from "../../database/models/Event";
 import EventUser from "../../database/models/EventUser";
 import Address from "../../database/models/Address";
 import { AddressBusiness } from "./AddressBusiness";
+import { TokenHandler } from "../Tools/TokenHandler";
 
 export class EventBusiness {
 
@@ -34,6 +35,9 @@ export class EventBusiness {
             idAddress:      address.id,
         });
         await newEvent.save();
+        if(this.getEvent(newEvent.id)){
+            this.addUserEvent(TokenHandler.tokenUserId, newEvent.id);
+        }
         return await this.getEvent(newEvent.id);
     } catch (error) {
         throw error;
