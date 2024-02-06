@@ -85,7 +85,7 @@ class Event extends Model
 
 
     @BelongsTo(() => Address, {
-        onDelete: "CASCADE"
+        onDelete: "CASCADE",
     })
     declare address: NonAttribute<Address>; 
 

@@ -22,6 +22,7 @@ export class AddressBusiness {
         address.address = addressDto.address;
         address.zipCode = addressDto.zipCode;
         address.city = addressDto.city;
+        address.save();
 
         return address;
     }

@@ -1,7 +1,6 @@
 import {EventDTO} from "../RequestBodies/EventDTO";
 import Event from "../../database/models/Event";
 import EventUser from "../../database/models/EventUser";
-import { AddressDTO } from "api/RequestBodies/AddressDTO";
 import Address from "../../database/models/Address";
 import { AddressBusiness } from "./AddressBusiness";
 
@@ -33,17 +32,8 @@ export class EventBusiness {
             date:           eventDto.date,
             address:        eventDto.address,
             idAddress:      address.id,
-            tabUser:        eventDto.tabUser    
         });
         await newEvent.save();
-        if(eventDto.tabUser){
-            console.log(eventDto.tabUser.length);
-            for (let i = 0; i < eventDto.tabUser.length; i++) {
-                this.eventUser.eventId = newEvent.id;
-                this.eventUser.userId = eventDto.tabUser[i];
-                await this.eventUser.save();
-            }
-        }
         return await this.getEvent(newEvent.id);
     } catch (error) {
         throw error;
@@ -99,6 +89,22 @@ export class EventBusiness {
     }
 
     /**
+     * Adds a user to an event
+     * @param userId User id
+     * @param eventId Event id 
+     * @returns
+     */
+    public async addUserEvent(userid: number, eventid: number)
+    {
+        let newEventUser: EventUser = new EventUser({
+            userId : userid,
+            eventId: eventid,
+        });
+        await newEventUser.save();
+        return newEventUser;
+    }
+
+    /**
      * Modifies an event
      * @param eventDto Request body
      * @returns
@@ -112,8 +118,7 @@ export class EventBusiness {
         event.followers = eventDto.followers;
         event.closed = eventDto.closed;
         event.date = eventDto.date;
-        await this.addressBusiness.modifyAddress(eventDto.address.id, eventDto.address);
-        event.tabUser = eventDto.tabUser;
+        await this.addressBusiness.modifyAddress(event.idAddress, eventDto.address);
         
         await event.save();
         return event;
