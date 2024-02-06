@@ -23,10 +23,9 @@ import EventUser from "./EventUser";
     underscored: true,
     defaultScope: {
         attributes: {
-            exclude: ['idSex', 'idAddress', 'password']
+            exclude: ['idSex', 'idAddress', 'password', "id_sex", "id_address"]
         },
         include: [
-            {model: Address, as: 'address'},
             {model: Sex, as: 'sex'}
         ]
     }
@@ -110,7 +109,7 @@ class User extends Model
     })
     declare idSex: number;
 
-    @BelongsTo(() => Sex, 'idSex')
+    @BelongsTo(() => Sex, 'id_sex')
     declare sex?: NonAttribute<Sex>;
 
 
@@ -123,7 +122,8 @@ class User extends Model
 
 
     @BelongsTo(() => Address, {
-        onDelete: "CASCADE"
+        onDelete: "CASCADE",
+        foreignKey: "id_address"
     })
     declare address: NonAttribute<Address>;
 
@@ -131,7 +131,6 @@ class User extends Model
     events: Event['id'][];
 
     @HasMany(() => Dog, {
-        foreignKey: 'idUser',
         onDelete: "CASCADE"
     })
     declare dogs: Dog[];
