@@ -1,3 +1,4 @@
+import { DogSex } from "database/models/Dog";
 import { BreedDTO } from "./BreedDTO";
 
 export class DogDTO 
@@ -10,7 +11,7 @@ export class DogDTO
 
     weight: number;
 
-    sex: boolean;
+    sex: DogSex;
 
     birthdate: Date;
 }
