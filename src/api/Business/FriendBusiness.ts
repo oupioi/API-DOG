@@ -18,7 +18,6 @@ export class FriendBusiness {
             date: friendDto.date,
             status: friendDto.status
         });
-
         return newfriend;
     }
 

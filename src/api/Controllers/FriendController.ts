@@ -12,7 +12,7 @@ const friendBusiness : FriendBusiness = new FriendBusiness();
 /**
  * Route to search friends of a user by its given id
  */
-router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/:id",TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try{
         const friends: Friend[] = await friendBusiness.getAllfriend(parseInt(req.params.id));
         res.json(friends);
@@ -24,7 +24,7 @@ router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
 /**
  * Route to search a relation between two users
  */
-router.get("/:id1/:id2", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/:id1/:id2",TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try{
         const realation : Friend = await  friendBusiness.getFriendship(parseInt(req.params.id1), parseInt(req.params.id2));
         res.json(realation);
@@ -37,7 +37,7 @@ router.get("/:id1/:id2", async (req: Request, res: Response, next: NextFunction)
 /**
  * Route to create a friend request
  */
-router.post("/", async (req: Request, res: Response, next) => {
+router.post("/",TokenHandler.handle, async (req: Request, res: Response, next) => {
     try {
         const friendDto: FriendDTO = plainToInstance(FriendDTO, req.body);
         const newfriend: Friend = await friendBusiness.createFriendRequest(friendDto);
@@ -56,7 +56,7 @@ router.post("/", async (req: Request, res: Response, next) => {
 /**
  * Route to accept a friend
  */
-router.post("/:id1/:id2", async (req: Request, res: Response, next) => {
+router.post("/:id1/:id2",TokenHandler.handle, async (req: Request, res: Response, next) => {
     try {
         const friend : Friend = await friendBusiness.acceptFriendRequest(parseInt(req.params.id1), parseInt(req.params.id2));
         res.json(friend);
@@ -67,7 +67,7 @@ router.post("/:id1/:id2", async (req: Request, res: Response, next) => {
 /**
  * Route to reject a friend
  */
-router.post("/reject/:id1/:id2", async (req: Request, res: Response, next) => {
+router.post("/reject/:id1/:id2",TokenHandler.handle,async (req: Request, res: Response, next) => {
     try {
         const friend : Friend = await friendBusiness.rejectFriendRequest(parseInt(req.params.id1), parseInt(req.params.id2));
         res.json(friend);
@@ -78,7 +78,7 @@ router.post("/reject/:id1/:id2", async (req: Request, res: Response, next) => {
 /**
  * Route to delete a friend
  */
-router.delete("/:id1/:id2", async (req: Request, res: Response, next) => {
+router.delete("/:id1/:id2",TokenHandler.handle, async (req: Request, res: Response, next) => {
     try{
         const result : void = await friendBusiness.deleteFriend(parseInt(req.params.id1), parseInt(req.params.id2));
         res.status(200).json({
