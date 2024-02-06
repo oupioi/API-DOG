@@ -3,7 +3,7 @@ import { FriendDTO } from "../../api/RequestBodies/FriendDTO";
 import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { FriendBusiness } from "../../api/Business/FriendBusiness";
-import { TokenHandler } from "api/Tools/TokenHandler";
+import { TokenHandler } from "../Tools/TokenHandler";
 
 
 const router: Router = express.Router();
@@ -24,9 +24,9 @@ router.get("/:id",TokenHandler.handle, async (req: Request, res: Response, next:
 /**
  * Route to search a relation between two users
  */
-router.get("/:id1/:id2",TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/:id1",TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const realation : Friend = await  friendBusiness.getFriendship(parseInt(req.params.id1), parseInt(req.params.id2));
+        const realation : Friend = await friendBusiness.getFriendship(TokenHandler.tokenUserId, parseInt(req.params.id1));
         res.json(realation);
     }catch(err){
         next(err);
@@ -54,7 +54,7 @@ router.post("/",TokenHandler.handle, async (req: Request, res: Response, next) =
 });
 
 /**
- * Route to accept a friend
+ * Route to accept a friendship
  */
 router.post("/:id1/:id2",TokenHandler.handle, async (req: Request, res: Response, next) => {
     try {
@@ -65,7 +65,7 @@ router.post("/:id1/:id2",TokenHandler.handle, async (req: Request, res: Response
     }
 });
 /**
- * Route to reject a friend
+ * Route to reject a friendship
  */
 router.post("/reject/:id1/:id2",TokenHandler.handle,async (req: Request, res: Response, next) => {
     try {
@@ -76,7 +76,7 @@ router.post("/reject/:id1/:id2",TokenHandler.handle,async (req: Request, res: Re
     }
 });
 /**
- * Route to delete a friend
+ * Route to delete a friendship
  */
 router.delete("/:id1/:id2",TokenHandler.handle, async (req: Request, res: Response, next) => {
     try{
