@@ -7,10 +7,12 @@ import { AddressBusiness } from "./AddressBusiness";
 
 export class EventBusiness {
 
-    private addressBusiness: AddressBusiness
+    private addressBusiness: AddressBusiness;
+    private eventUser: EventUser;
 
     public constructor () {
         this.addressBusiness = new AddressBusiness();
+        this.eventUser = new EventUser();
     }
 
     /**
@@ -34,6 +36,14 @@ export class EventBusiness {
             tabUser:        eventDto.tabUser    
         });
         await newEvent.save();
+        if(eventDto.tabUser){
+            console.log(eventDto.tabUser.length);
+            for (let i = 0; i < eventDto.tabUser.length; i++) {
+                this.eventUser.eventId = newEvent.id;
+                this.eventUser.userId = eventDto.tabUser[i];
+                await this.eventUser.save();
+            }
+        }
         return await this.getEvent(newEvent.id);
     } catch (error) {
         throw error;
