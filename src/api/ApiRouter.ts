@@ -5,6 +5,7 @@ import parkController from "./Controllers/ParkController";
 import noteController from "./Controllers/NoteController";
 import dogController from "./Controllers/DogController";
 import breedController from "./Controllers/BreedController";
+import addressController from "./Controllers/AddressController";
 
 const router: Router = express.Router();
 
@@ -14,4 +15,5 @@ router.use('/park', parkController);
 router.use('/note', noteController);
 router.use('/dog', dogController);
 router.use('/breed', breedController);
+router.use('/address', addressController);
 export default router;

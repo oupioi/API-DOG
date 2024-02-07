@@ -36,7 +36,7 @@ export class ParkBusiness {
      * @returns List of parks
      */
     public async getAllParks() {
-        const parks: { rows: Park[], count: number } = await Park.findAndCountAll();
+        const parks: { rows: Park[], count: number } = await Park.findAndCountAll({ include: { all: true } });
         return parks
     }
 
@@ -46,7 +46,7 @@ export class ParkBusiness {
      * @returns Promise<Park>
      */
     public async getParkById(id: number) {
-        let park: Park | null = await Park.findByPk(id);
+        let park: Park | null = await Park.findByPk(id, { include: { all: true } });
         return park;
     }
 
@@ -57,16 +57,17 @@ export class ParkBusiness {
      */
     public async getParkByZipCode(zip_code: number) {
         const parks: { rows: Park[], count: number } = await Park.findAndCountAll(
-        {
-            include: [{
-                model: Address,
-                where: {
-                    zip_code: {
-                        [Op.startsWith]: `${zip_code}`
-                    }
-                }
-            }]
-        });
+            {
+                include: [{
+                    model: Address,
+                    where: {
+                        zip_code: {
+                            [Op.startsWith]: `${zip_code}`
+                        }
+                    },
+                    all: true
+                }]
+            });
         return parks;
     }
 
@@ -75,12 +76,11 @@ export class ParkBusiness {
      * @param parkDto 
      * @returns Park
      */
-    public async modifyPark(parkDto: ParkDTO) 
-    {
+    public async modifyPark(parkDto: ParkDTO) {
         const address: Address = await this.addressBusiness.createAddress(parkDto.address);
         let park: Park = await Park.findByPk(parkDto.id);
 
-        if(!park) {
+        if (!park) {
             throw new CustomError("Not found", 404);
         }
 
@@ -89,7 +89,7 @@ export class ParkBusiness {
         park.idAddress = address.id
 
         await park.save();
-        return await Park.findByPk(park.id);
+        return await Park.findByPk(park.id, { include: { all: true } });
     }
 
     /**
