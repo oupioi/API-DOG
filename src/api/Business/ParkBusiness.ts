@@ -77,8 +77,12 @@ export class ParkBusiness {
      * @returns Park
      */
     public async modifyPark(parkDto: ParkDTO) {
-        const address: Address = await this.addressBusiness.createAddress(parkDto.address);
-        let park: Park = await Park.findByPk(parkDto.id);
+
+        let park: Park = await Park.findByPk(parkDto.id,
+            {
+                include: { model: Address, as: 'address' }
+            }
+        );
 
         if (!park) {
             throw new CustomError("Not found", 404);
@@ -86,7 +90,8 @@ export class ParkBusiness {
 
         park.name = parkDto.name;
         park.topography = parkDto.topography;
-        park.idAddress = address.id
+
+        await this.addressBusiness.modifyAddress(park.address.id, parkDto.address);
 
         await park.save();
         return await Park.findByPk(park.id, { include: { all: true } });
