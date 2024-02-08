@@ -30,6 +30,18 @@ router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next
     }
 })
 
+router.get('/search/:zip_code', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result: { rows: Alert[], count: number } = await alertBusiness.getAlertByZipCode(parseInt(req.params.zip_code));
+        res.json({
+            total_items: result.count,
+            parks: result.rows
+        })
+    } catch (error) {
+        next(error);
+    }
+})
+
 /**
  * @todo A déplacer dans le controller ADMIN
  */

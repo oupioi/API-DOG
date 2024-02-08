@@ -1,6 +1,8 @@
 import { AlertDTO } from "api/RequestBodies/AlertDTO";
 import { CustomError } from "../../api/Tools/ErrorHandler";
 import Alert from "../../database/models/Alert";
+import { Op } from "sequelize";
+import Address from "../../database/models/Address";
 
 export class AlertBusiness {
     /**
@@ -40,6 +42,23 @@ export class AlertBusiness {
     public async getAlertById(id: number) {
         let alert: Alert | null = await Alert.findByPk(id);
         return alert;
+    }
+
+    /**
+     * return alert by zipCode
+     * @param zipCode 
+     * @returns Alerts
+     */
+    public async getAlertByZipCode(zip_code: number) {
+        const alerts: { rows: Alert[], count: number} = await Alert.findAndCountAll(
+        {
+            where: {
+                zip_code: {
+                    [Op.startsWith]: `${zip_code}`
+                }
+            }
+        })
+        return alerts;
     }
 
     /**
