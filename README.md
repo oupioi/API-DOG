@@ -1,6 +1,6 @@
 # PROJET 3 - DOG APP
 
-Projet de fin d'études (Concépteur & Développeur de Nouvelles Technologies) fait par Maxence OPIGEZ, Florian DESMARCHELIERS et Théo FOLQUIN.
+Projet de fin d'études (Concépteur & Développeur de Nouvelles Technologies) fait par Maxence OPIGEZ, Florian DESMARCHELIER et Théo FOLQUIN.
 
 ### Commandes passées pour créer le projet
 
