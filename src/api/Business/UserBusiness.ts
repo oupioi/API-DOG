@@ -34,15 +34,17 @@ export class UserBusiness {
         if (existingUser) {
             throw new CustomError("This email is already used");
         }
+        const notifyFriends = userDto.notifyFriends ? userDto.notifyFriends : true;
+        const pseudo = userDto.pseudo.charAt(0) !== '@' ? '@'+userDto.pseudo : userDto.pseudo;
 
         let newUser: User = new User({
-            pseudo:         userDto.pseudo,
+            pseudo:         pseudo,
             email:          userDto.email,
             password:       hPassword,
             firstName:      userDto.firstName,
             lastName:       userDto.lastName,
             birthdate:      userDto.birthdate,
-            notifyFriends:  userDto.notifyFriends,
+            notifyFriends:  notifyFriends,
             idSex:          userDto.sex.id,
             idAddress:      address.id
         });
