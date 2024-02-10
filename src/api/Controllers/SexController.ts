@@ -8,12 +8,6 @@ const router: Router = express.Router();
 const sexBusiness: SexBusiness = new SexBusiness();
 
 
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-    const sexDto = plainToInstance(SexDTO, req.body);
-    const sex = await sexBusiness.createSex(sexDto);
-    return res.status(201).json(sex);
-})
-
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const sexes: Sex[] = await sexBusiness.getSexes();

@@ -49,7 +49,7 @@ export class UserBusiness {
             idAddress:      address.id
         });
         await newUser.save();
-        const token: string = TokenHandler.create(newUser.id);
+        const token: string = TokenHandler.create(newUser.id, newUser.roles);
         
         return {id: newUser.id, token: token};
     }
@@ -177,14 +177,14 @@ export class UserBusiness {
             where: {
                 email: userDto.email
             },
-            attributes: ["password", "id"]
+            attributes: ["password", "id", "roles"]
         });
         if (!user) {
             throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
         }
         const match = await bcryptjs.compare(userDto.password, user.password);
         if (match) {
-            const token: string = TokenHandler.create(user.id);
+            const token: string = TokenHandler.create(user.id, user.roles);
             
             return {id: user.id, token: token};
         }
