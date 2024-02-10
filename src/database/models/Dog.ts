@@ -10,6 +10,10 @@ import User from "./User";
 import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
 import Breed from "./Breed";
 
+export enum DogSex {
+    male = 'male',
+    female = 'female'
+}
 @Table({
     timestamps: false,
     tableName: "dog",
@@ -43,10 +47,10 @@ class Dog extends Model
     declare weight: number;
 
     @Column({
-        type: DataType.BOOLEAN,
+        type: DataType.ENUM(...Object.values(DogSex)),
         allowNull: false
     })
-    declare sex: boolean;
+    declare sex: DogSex;
 
     @Column({
         type: DataType.DATE,

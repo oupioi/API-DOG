@@ -13,6 +13,11 @@ import Sex from "./Sex";
 import { BelongsToSetAssociationMixin, NonAttribute, Op } from "sequelize";
 import Dog from "./Dog";
 
+export enum Roles {
+    moderator   = "MODERATOR",
+    admin       = "ADMIN"
+}
+
 @Table({
     timestamps: false,
     tableName: "user",
@@ -23,7 +28,6 @@ import Dog from "./Dog";
             exclude: ['idSex', 'idAddress', 'password', "id_sex", "id_address"]
         },
         include: [
-            {model: Address, as: 'address'},
             {model: Sex, as: 'sex'}
         ]
     }
@@ -99,6 +103,13 @@ class User extends Model
         allowNull: false
     })
     declare notifyFriends: boolean;
+
+    @Column({
+        type: DataType.JSON,
+        allowNull: true,
+        defaultValue: []
+    })
+    declare roles?: Roles[];
 
     @ForeignKey(() => Sex)
     @Column({

@@ -1,5 +1,4 @@
 export class SexDTO {
-    id: number|null;
-    
+    id?: number;
     name: string;
 }
