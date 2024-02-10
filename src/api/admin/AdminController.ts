@@ -9,18 +9,22 @@ import { TokenHandler } from "../../api/Tools/TokenHandler";
 
 
 const router: Router = express.Router();
-const alertBusiness: AlertBusiness = new AlertBusiness();
 
+// ---------------------------------- GET -------------------------------------
 router.get('/customer/ihm', TokenHandler.handle, TokenHandler.isAdmin, async (req: Request, res: Response, next: NextFunction) => {
     const userBusiness: UserBusiness = new UserBusiness();
     try {
-        const result = await userBusiness.getAllUsers();
-        res.status(200).json(result);
+        const result = await userBusiness.getUserIHM(req.query?.email as string, req.query?.pseudo as string, parseInt(req.query?.limit as string));
+        res.status(200).json({
+            total_items: result.count,
+            users: result.rows
+        });
     } catch (error) {
         next(error)
     }
 })
 
+// ---------------------------------- POST -------------------------------------
 router.post("/sex", async (req: Request, res: Response, next: NextFunction) => {
     const sexBusiness = new SexBusiness();
     try {
@@ -31,6 +35,11 @@ router.post("/sex", async (req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 })
+
+// ---------------------------------- PUT -------------------------------------
+
+
+// ---------------------------------- DELETE -------------------------------------
 
 
 export default router;

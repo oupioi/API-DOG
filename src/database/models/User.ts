@@ -15,8 +15,7 @@ import Dog from "./Dog";
 
 export enum Roles {
     moderator   = "MODERATOR",
-    admin       = "ADMIN",
-    viewer      = null
+    admin       = "ADMIN"
 }
 
 @Table({
@@ -110,7 +109,7 @@ class User extends Model
         allowNull: true,
         defaultValue: []
     })
-    declare roles: Roles[];
+    declare roles?: Roles[];
 
     @ForeignKey(() => Sex)
     @Column({
