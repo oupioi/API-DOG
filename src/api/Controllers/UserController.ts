@@ -1,5 +1,5 @@
 import { UserDTO } from "../RequestBodies/UserDTO";
-import User from "../../database/models/User";
+import User, { Roles } from "../../database/models/User";
 import express, { NextFunction, Request, Response, Router } from "express";
 import { plainToInstance } from "class-transformer";
 import { UserBusiness } from "../Business/UserBusiness";
@@ -55,11 +55,12 @@ router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next
 router.post("/", async (req: Request, res: Response, next) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
-        const user: {id: number, token: string} = await userBusiness.createUser(userDto);
+        const user: {id: number, token: string, roles: Roles[]} = await userBusiness.createUser(userDto);
 
         res.status(201).json({
-            user_id:     user.id,
-            token:  user.token
+            user_id:    user.id,
+            token:      user.token,
+            roles:      user.roles
         });
     } catch (error) {
         next(error);
@@ -93,10 +94,11 @@ router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, n
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userDto: UserDTO = plainToInstance(UserDTO, req.body);
-        const user: {id: number, token: string} = await userBusiness.login(userDto);
+        const user: {id: number, token: string, roles: Roles[]} = await userBusiness.login(userDto);
         res.status(200).json({
             user_id:    user.id,
-            token:      user.token
+            token:      user.token,
+            roles:      user.roles
         });
     } catch (error) {
         next(error);
