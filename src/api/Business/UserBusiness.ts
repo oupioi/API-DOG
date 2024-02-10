@@ -115,18 +115,19 @@ export class UserBusiness {
         if (emailUser && emailUser.id != userDto.id) {
             throw new CustomError("This email is already used")
         }
-        
-        const match: boolean = await bcryptjs.compare(userDto.password, user.password)
-        if (!match) {
-            const hPassword: string = await bcryptjs.hash(userDto.password, 10);
-            user.password = hPassword;
+        if (userDto.password && userDto.password != '') {
+            const match: boolean = await bcryptjs.compare(userDto.password, user.password)
+            if (!match) {
+                const hPassword: string = await bcryptjs.hash(userDto.password, 10);
+                user.password = hPassword;
+            }
         }
         user.email = userDto.email;
         user.pseudo = userDto.pseudo;
         user.firstName = userDto.firstName;
         user.lastName = userDto.lastName;
         user.birthdate = userDto.birthdate;
-        user.notifyFriends = userDto.notifyFriends;
+        user.notifyFriends = userDto.notifyFriends ?? false;
         user.idSex = userDto.sex.id;
         await this.addressBusiness.modifyUserAddress(user.address, userDto.address);
 
