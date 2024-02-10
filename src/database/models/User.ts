@@ -16,6 +16,11 @@ import Dog from "./Dog";
 import Event from "./Event";
 import EventUser from "./EventUser";
 
+export enum Roles {
+    moderator   = "MODERATOR",
+    admin       = "ADMIN"
+}
+
 @Table({
     timestamps: false,
     tableName: "user",
@@ -101,6 +106,13 @@ class User extends Model
         allowNull: false
     })
     declare notifyFriends: boolean;
+
+    @Column({
+        type: DataType.JSON,
+        allowNull: true,
+        defaultValue: []
+    })
+    declare roles?: Roles[];
 
     @ForeignKey(() => Sex)
     @Column({
