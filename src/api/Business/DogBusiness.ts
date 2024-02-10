@@ -64,7 +64,11 @@ export class DogBusiness {
      */
     public async deleteDog(id: number)
     {
-        const dog: Dog = await Dog.findByPk(id);
+        const dog: Dog = await Dog.findByPk(id, {
+            attributes: {
+                include: ["idUser"]
+            }
+        });
         if (!dog) {
             throw new CustomError("Not found", 404);
         }

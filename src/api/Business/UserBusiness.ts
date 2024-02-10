@@ -1,4 +1,4 @@
-import User from "../../database/models/User";
+import User, { Roles } from "../../database/models/User";
 import { UserDTO } from "../RequestBodies/UserDTO";
 import Address from "../../database/models/Address";
 import Sex from "../../database/models/Sex";
@@ -18,11 +18,10 @@ export class UserBusiness {
 
     /**
      * Checks if user exists by the given email, if not, creates it.
-     * @param userDto 
-     * @returns Promise<User>
+     * @param userDto
      * @throws CustomError
      */
-    public async createUser(userDto: UserDTO): Promise<{id: number, token: string}>
+    public async createUser(userDto: UserDTO): Promise<{id: number, token: string, roles: Roles[]}>
     {
         // Creates address first
         const address: Address = await this.addressBusiness.createAddress(userDto.address);
@@ -34,22 +33,24 @@ export class UserBusiness {
         if (existingUser) {
             throw new CustomError("This email is already used");
         }
+        const notifyFriends = userDto.notifyFriends ? userDto.notifyFriends : true;
+        const pseudo = userDto.pseudo.charAt(0) !== '@' ? '@'+userDto.pseudo : userDto.pseudo;
 
         let newUser: User = new User({
-            pseudo:         userDto.pseudo,
+            pseudo:         pseudo,
             email:          userDto.email,
             password:       hPassword,
             firstName:      userDto.firstName,
             lastName:       userDto.lastName,
             birthdate:      userDto.birthdate,
-            notifyFriends:  userDto.notifyFriends,
+            notifyFriends:  notifyFriends,
             idSex:          userDto.sex.id,
             idAddress:      address.id
         });
         await newUser.save();
-        const token: string = TokenHandler.create(newUser.id);
+        const token: string = TokenHandler.create(newUser.id, newUser.roles);
         
-        return {id: newUser.id, token: token};
+        return {id: newUser.id, token: token, roles: newUser.roles};
     }
 
     /**
@@ -113,18 +114,19 @@ export class UserBusiness {
         if (emailUser && emailUser.id != userDto.id) {
             throw new CustomError("This email is already used")
         }
-        
-        const match: boolean = await bcryptjs.compare(userDto.password, user.password)
-        if (!match) {
-            const hPassword: string = await bcryptjs.hash(userDto.password, 10);
-            user.password = hPassword;
+        if (userDto.password && userDto.password != '') {
+            const match: boolean = await bcryptjs.compare(userDto.password, user.password)
+            if (!match) {
+                const hPassword: string = await bcryptjs.hash(userDto.password, 10);
+                user.password = hPassword;
+            }
         }
         user.email = userDto.email;
         user.pseudo = userDto.pseudo;
         user.firstName = userDto.firstName;
         user.lastName = userDto.lastName;
         user.birthdate = userDto.birthdate;
-        user.notifyFriends = userDto.notifyFriends;
+        user.notifyFriends = userDto.notifyFriends ?? false;
         user.idSex = userDto.sex.id;
         await this.addressBusiness.modifyUserAddress(user.address, userDto.address);
 
@@ -174,16 +176,16 @@ export class UserBusiness {
             where: {
                 email: userDto.email
             },
-            attributes: ["password", "id"]
+            attributes: ["password", "id", "roles"]
         });
         if (!user) {
             throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
         }
         const match = await bcryptjs.compare(userDto.password, user.password);
         if (match) {
-            const token: string = TokenHandler.create(user.id);
+            const token: string = TokenHandler.create(user.id, user.roles);
             
-            return {id: user.id, token: token};
+            return {id: user.id, token: token, roles: user.roles};
         }
         throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
     }
@@ -200,6 +202,35 @@ export class UserBusiness {
                 }
             },
             limit: 10
+        });
+        return users;
+    }
+
+    // --------------------------- ADMIN ----------------------------
+
+    /**
+     * Users IHM for admin screen 
+     */
+    public async getUserIHM(email?: string, pseudo?: string, limit?: number)
+    {
+        let whereClause = {};
+
+        if (pseudo) {
+            whereClause = {
+                ...whereClause,
+                pseudo: { [Op.like]: `${pseudo}%` }
+            };
+        }
+        if (email) {
+            whereClause = {
+                ...whereClause,
+                email: { [Op.like]: `${email}%` }
+            };
+        }
+        
+        const users: { rows: User[]; count: number; } = await User.findAndCountAll({
+            where: whereClause,
+            limit: 20
         });
         return users;
     }
