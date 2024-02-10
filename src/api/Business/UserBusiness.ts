@@ -1,4 +1,4 @@
-import User from "../../database/models/User";
+import User, { Roles } from "../../database/models/User";
 import { UserDTO } from "../RequestBodies/UserDTO";
 import Address from "../../database/models/Address";
 import Sex from "../../database/models/Sex";
@@ -18,11 +18,10 @@ export class UserBusiness {
 
     /**
      * Checks if user exists by the given email, if not, creates it.
-     * @param userDto 
-     * @returns Promise<User>
+     * @param userDto
      * @throws CustomError
      */
-    public async createUser(userDto: UserDTO): Promise<{id: number, token: string}>
+    public async createUser(userDto: UserDTO): Promise<{id: number, token: string, roles: Roles[]}>
     {
         // Creates address first
         const address: Address = await this.addressBusiness.createAddress(userDto.address);
@@ -49,9 +48,9 @@ export class UserBusiness {
             idAddress:      address.id
         });
         await newUser.save();
-        const token: string = TokenHandler.create(newUser.id);
+        const token: string = TokenHandler.create(newUser.id, newUser.roles);
         
-        return {id: newUser.id, token: token};
+        return {id: newUser.id, token: token, roles: newUser.roles};
     }
 
     /**
@@ -177,16 +176,16 @@ export class UserBusiness {
             where: {
                 email: userDto.email
             },
-            attributes: ["password", "id"]
+            attributes: ["password", "id", "roles"]
         });
         if (!user) {
             throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
         }
         const match = await bcryptjs.compare(userDto.password, user.password);
         if (match) {
-            const token: string = TokenHandler.create(user.id);
+            const token: string = TokenHandler.create(user.id, user.roles);
             
-            return {id: user.id, token: token};
+            return {id: user.id, token: token, roles: user.roles};
         }
         throw new CustomError('Could not authenticate you, wrong combination of email/password', 403);
     }
@@ -203,6 +202,35 @@ export class UserBusiness {
                 }
             },
             limit: 10
+        });
+        return users;
+    }
+
+    // --------------------------- ADMIN ----------------------------
+
+    /**
+     * Users IHM for admin screen 
+     */
+    public async getUserIHM(email?: string, pseudo?: string, limit?: number)
+    {
+        let whereClause = {};
+
+        if (pseudo) {
+            whereClause = {
+                ...whereClause,
+                pseudo: { [Op.like]: `${pseudo}%` }
+            };
+        }
+        if (email) {
+            whereClause = {
+                ...whereClause,
+                email: { [Op.like]: `${email}%` }
+            };
+        }
+        
+        const users: { rows: User[]; count: number; } = await User.findAndCountAll({
+            where: whereClause,
+            limit: 20
         });
         return users;
     }
