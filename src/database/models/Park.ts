@@ -13,7 +13,12 @@ import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
     timestamps: false,
     tableName: "park",
     modelName: "Park",
-    underscored: true
+    underscored: true,
+    defaultScope: {
+        attributes: {
+            exclude: ['idAddress', 'id_address']
+        }
+    }
 })
 class Park extends Model 
 {
@@ -44,11 +49,13 @@ class Park extends Model
     declare idAddress: number;
 
     @BelongsTo(() => Address, {
-        onDelete: "CASCADE"
+        onDelete: "CASCADE",
+        foreignKey: "id_address"
     })
     declare address: NonAttribute<Address>;
 
-    declare setAddress: BelongsToSetAssociationMixin<Address, Park['idAddress']>;
+    declare setAddress: BelongsToSetAssociationMixin<Address, Address['id']>;
+
 }
 
 export default Park;

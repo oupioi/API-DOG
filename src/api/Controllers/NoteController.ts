@@ -58,7 +58,7 @@ router.post('/park/:id', TokenHandler.handle, async (req: Request, res: Response
 router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const noteDto: NoteDTO = plainToInstance(NoteDTO, req.body);
-        const note: Note = await Note.findByPk(noteDto.id);
+        const note: Note = await noteBusiness.modifyNote(noteDto, parseInt(req.params.id));
 
         res.status(200).json(note);
     } catch(error) {

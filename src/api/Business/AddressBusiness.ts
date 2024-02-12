@@ -18,11 +18,12 @@ export class AddressBusiness {
 
     public async modifyAddress(idAddress: number, addressDto: AddressDTO): Promise<Address>
     {
-        let address: Address = await Address.findByPk(idAddress).then();
+        let address: Address = await Address.findByPk(idAddress);
         address.address = addressDto.address;
         address.zipCode = addressDto.zipCode;
         address.city = addressDto.city;
 
+        
         return address;
     }
 

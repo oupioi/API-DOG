@@ -63,12 +63,14 @@ export class NoteBusiness {
         let note: Note = await Note.findByPk(noteDto.id);
         let park: Park = await Park.findByPk(idPark);
 
+        console.log(note);
+        
+
         if(!note) {
             throw new CustomError("Not found", 404);
         }
         note.note       = noteDto.note;
         note.content    = noteDto.content;
-        note.createdAt  = noteDto.createdAt;
         note.idPark     = park.id;
 
         await note.save();
