@@ -211,7 +211,7 @@ export class UserBusiness {
     /**
      * Users IHM for admin screen 
      */
-    public async getUserIHM(email?: string, pseudo?: string, limit?: number)
+    public async getUserIHM(email?: string, pseudo?: string, limit?: number, offset?: number)
     {
         let whereClause = {};
 
@@ -230,7 +230,8 @@ export class UserBusiness {
         
         const users: { rows: User[]; count: number; } = await User.findAndCountAll({
             where: whereClause,
-            limit: 20
+            limit: 20,
+            ...(offset && {offset: offset})
         });
         return users;
     }
