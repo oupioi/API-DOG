@@ -1,6 +1,7 @@
-import { AlertDTO } from "api/RequestBodies/AlertDTO";
+import { AlertDTO } from "../../api/RequestBodies/AlertDTO";
 import { CustomError } from "../../api/Tools/ErrorHandler";
 import Alert from "../../database/models/Alert";
+import { Op } from "sequelize";
 
 export class AlertBusiness {
     /**
@@ -13,9 +14,9 @@ export class AlertBusiness {
         try {
             const newAlert = await Alert.create({
                 title: alertDto.title,
-                context: alertDto.context,
                 content: alertDto.content,
-                zip_code: alertDto.zip_code
+                zip_code: alertDto.zip_code,
+                createdAt: alertDto.createdAt
             })
             return newAlert;
         } catch {
@@ -43,21 +44,56 @@ export class AlertBusiness {
     }
 
     /**
+     * return alert by zipCode
+     * @param zipCode 
+     * @returns Alerts
+     */
+    public async getAlertByZipCode(zip_code: number) {
+        const alerts: { rows: Alert[], count: number } = await Alert.findAndCountAll(
+            {
+                where: {
+                    zip_code: {
+                        [Op.startsWith]: `${zip_code}`
+                    }
+                }
+            })
+        return alerts;
+    }
+
+    /**
+     * return alert created last n days
+     * @param nDays 
+     * @returns Alerts
+     */
+    public async getAlertByCreatedDate(nDays: number) {
+        const today = new Date();
+        const lastNDays = new Date(today.getTime() - nDays * 24 * 60 * 60 * 1000); // Soustraire 30 jours en millisecondes
+        const alerts: { rows: Alert[], count: number } = await Alert.findAndCountAll(
+            {
+                where: {
+                    createdAt: {
+                        [Op.gte]: lastNDays
+                    }
+                }
+            }
+        )
+        return alerts;
+    }
+
+    /**
      * Modify an Alert
      * @param alertDto 
      * @returns Alert
      */
-    public async modifyAlert(alertDto: AlertDTO) 
-    {
+    public async modifyAlert(alertDto: AlertDTO) {
         let alert: Alert = await Alert.findByPk(alertDto.id);
 
-        if(!alert) {
+        if (!alert) {
             throw new CustomError("Not found", 404);
         }
-        alert.title     = alertDto.title;
-        alert.context   = alertDto.context;
-        alert.content   = alertDto.content;
-        alert.zip_code  = alertDto.zip_code;
+        alert.title = alertDto.title;
+        alert.content = alertDto.content;
+        alert.zip_code = alertDto.zip_code;
 
         await alert.save();
         return await Alert.findByPk(alert.id);

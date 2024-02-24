@@ -3,9 +3,9 @@ export class AlertDTO {
 
     title: string;
 
-    context: string;
-
     content: string;
 
     zip_code: number;
+
+    createdAt: Date;
 }
