@@ -13,17 +13,18 @@ export class NoteBusiness {
     public async createNote(noteDto: NoteDTO, idPark: number): Promise<Note> 
     {
         //Vérifier si le parc existe
-            const park: Park = await Park.findByPk(idPark);
+        const park: Park = await Park.findByPk(idPark);
 
-            if (park) {
-            let newNote: Note = new Note({
+        try {
+            const newNote: Note = await Note.create({
                 note:       noteDto.note,
                 content:    noteDto.content,
                 createdAt:  noteDto.createdAt,
                 idPark:     park.id
-            });
-            await newNote.save();
-            return await this.getNote(newNote.id);
+            })
+            return newNote;
+        } catch {
+            throw new CustomError("Couldn't create park");
         }
     }
 
@@ -48,9 +49,47 @@ export class NoteBusiness {
     public async getNote(id: number)
     {
         const note: Note | null = await Note.findByPk(id);
-        if (!note) {
+        return note;
+    }
+
+    /**
+     * Modify a Note link to a Park
+     * @param noteDto 
+     * @param idPark 
+     * @returns Note
+     */
+    public async modifyNote(noteDto: NoteDTO, idPark: number) 
+    {
+        let note: Note = await Note.findByPk(noteDto.id);
+        let park: Park = await Park.findByPk(idPark);
+
+        console.log(note);
+        
+
+        if(!note) {
             throw new CustomError("Not found", 404);
         }
-        return note;
+        note.note       = noteDto.note;
+        note.content    = noteDto.content;
+        note.idPark     = park.id;
+
+        await note.save();
+        return await Note.findByPk(note.id);
+    }
+
+    /**
+     * Delete Note
+     * @param idNote 
+     * @returns 
+     */
+    public async deleteNote(idNote: number) 
+    {
+        const note: Note = await Note.findByPk(idNote);
+
+        if(note) {
+            return note.destroy();
+        } else {
+            throw new CustomError("Note not found");
+        }
     }
 }

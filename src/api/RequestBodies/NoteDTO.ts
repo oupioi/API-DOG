@@ -3,7 +3,7 @@ import { ParkDTO } from "./ParkDTO";
 export class NoteDTO {
     id: number;
 
-    note: string;
+    note: number;
 
     content: string;
 

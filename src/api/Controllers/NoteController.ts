@@ -3,13 +3,15 @@ import { NoteBusiness } from "../../api/Business/NoteBusiness";
 import { CustomError } from "../../api/Tools/ErrorHandler";
 import Note from "../../database/models/Note";
 import Park from "../../database/models/Park";
-import express, { Router, Request, Response } from "express";
-import { instanceToPlain, plainToInstance } from "class-transformer";
+import express, { Router, Request, Response, NextFunction } from "express";
+import { plainToInstance } from "class-transformer";
+import { TokenHandler } from "../../api/Tools/TokenHandler";
+import { AlertDTO } from "../../api/RequestBodies/AlertDTO";
 
 const router: Router = express.Router();
 const noteBusiness: NoteBusiness = new NoteBusiness();
 
-router.get('/park/:id', async (req: Request, res: Response, next) => {
+router.get('/park/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         //Vérifier si le parc existe
         const park: Park = await Park.findByPk(parseInt(req.params.id));
@@ -27,7 +29,7 @@ router.get('/park/:id', async (req: Request, res: Response, next) => {
     }
 })
 
-router.get('/:id', async (req: Request, res: Response, next) => {
+router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const note: Note = await noteBusiness.getNote(parseInt(req.params.id));
         res.json(note);
@@ -36,7 +38,7 @@ router.get('/:id', async (req: Request, res: Response, next) => {
     }
 })
 
-router.post('/park/:id', async (req: Request, res: Response, next) => {
+router.post('/park/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         //Vérifier si la parc existe
         const park: Park = await Park.findByPk(parseInt(req.params.id));
@@ -49,6 +51,28 @@ router.post('/park/:id', async (req: Request, res: Response, next) => {
             throw new CustomError ("Can't find park");
         }
     } catch (error) {
+        next(error);
+    }
+})
+
+router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const noteDto: NoteDTO = plainToInstance(NoteDTO, req.body);
+        const note: Note = await noteBusiness.modifyNote(noteDto, parseInt(req.params.id));
+
+        res.status(200).json(note);
+    } catch(error) {
+        next(error);
+    }
+})
+
+router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await noteBusiness.deleteNote(parseInt(req.params.id));
+        res.status(200).json({
+            message: "Note deleted"
+        })
+    } catch(error) {
         next(error);
     }
 })
