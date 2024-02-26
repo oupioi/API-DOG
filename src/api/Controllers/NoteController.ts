@@ -81,8 +81,8 @@ router.get('/park/:id/average', TokenHandler.handle, async (req: Request, res: R
         //Vérifier si le parc existe
         const park: Park = await Park.findByPk(parseInt(req.params.id));
         if (park) {
-            const averageNote: Note = await noteBusiness.getParkNoteAverage(park.id);
-            res.json(averageNote)
+            const average: number = await noteBusiness.getParkNoteAverage(park.id);
+            res.json(average);
         } else {
             throw new CustomError ("Can't find park");
         }
