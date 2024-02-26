@@ -6,7 +6,6 @@ import Park from "../../database/models/Park";
 import express, { Router, Request, Response, NextFunction } from "express";
 import { plainToInstance } from "class-transformer";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
-import { AlertDTO } from "../../api/RequestBodies/AlertDTO";
 
 const router: Router = express.Router();
 const noteBusiness: NoteBusiness = new NoteBusiness();
@@ -40,7 +39,7 @@ router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next
 
 router.post('/park/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
-        //Vérifier si la parc existe
+        //Vérifier si le parc existe
         const park: Park = await Park.findByPk(parseInt(req.params.id));
         if (park) {
             const noteDto: NoteDTO = plainToInstance(NoteDTO, req.body);
@@ -73,6 +72,21 @@ router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, n
             message: "Note deleted"
         })
     } catch(error) {
+        next(error);
+    }
+})
+
+router.get('/park/:id/average', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        //Vérifier si le parc existe
+        const park: Park = await Park.findByPk(parseInt(req.params.id));
+        if (park) {
+            const averageNote: Note = await noteBusiness.getParkNoteAverage(park.id);
+            res.json(averageNote)
+        } else {
+            throw new CustomError ("Can't find park");
+        }
+    } catch (error) {
         next(error);
     }
 })

@@ -2,6 +2,7 @@ import { NoteDTO } from "../../api/RequestBodies/NoteDTO";
 import Note from "../../database/models/Note";
 import { CustomError } from "../../api/Tools/ErrorHandler";
 import Park from "../../database/models/Park";
+import sequelize from "database/connection";
 
 export class NoteBusiness {
     /**
@@ -91,5 +92,16 @@ export class NoteBusiness {
         } else {
             throw new CustomError("Note not found");
         }
+    }
+
+    public async getParkNoteAverage(idPark: number)
+    {
+        const averageNote: Note = await Note.findOne({
+            attributes: [
+                [sequelize.fn('AVG', sequelize.col('valeur')), 'moyenne']
+            ],
+            where: { idPark: idPark }
+        });
+        return averageNote;
     }
 }
