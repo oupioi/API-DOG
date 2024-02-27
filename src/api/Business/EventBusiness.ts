@@ -4,7 +4,7 @@ import EventUser from "../../database/models/EventUser";
 import Address from "../../database/models/Address";
 import { AddressBusiness } from "./AddressBusiness";
 import { TokenHandler } from "../Tools/TokenHandler";
-
+import { Op } from "sequelize";
 export class EventBusiness {
 
     private addressBusiness: AddressBusiness;
@@ -126,5 +126,69 @@ export class EventBusiness {
         
         await event.save();
         return event;
+    }
+
+    /**
+     * Deletes a user from an event
+     * @param userId User id
+     * @param eventId Event id
+     * @returns
+     * */
+    public async deleteUserEvent(userId: number, eventId: number)
+    {
+        const eventUser = await EventUser.findOne({
+            where: {
+                userId: userId,
+                eventId: eventId
+            }
+        });
+        await eventUser.destroy();
+    }
+
+    /**
+     * Returns every event a user is in
+     * @param userId User id
+     * @returns
+     */
+    public async getUserEvents(userId: number)
+    {
+        const events = await EventUser.findAll({
+            where: {
+                userId: userId
+            }
+        });
+        return events;
+    }
+
+    /**
+     * Returns every event in past of date of today
+     * @returns 
+     */
+    public async getPastEvents()
+    {
+        const events = await Event.findAll({
+            where: {
+                date: {
+                    [Op.lt]: new Date()
+                }
+            }
+        });
+        return events;
+    }
+
+    /**
+     * Returns every event in future of date of today
+     * @returns 
+     */
+    public async getFutureEvents()
+    {
+        const events = await Event.findAll({
+            where: {
+                date: {
+                    [Op.gte]: new Date()
+                }
+            }
+        });
+        return events;
     }
 }

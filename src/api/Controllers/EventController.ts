@@ -22,6 +22,37 @@ router.get('/', TokenHandler.handle, async (req: Request, res: Response, next: N
 }
 )
 
+router.get('/future', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const events = await eventBusiness.getFutureEvents();
+        res.json(events);
+    } catch (error) {
+        next(error); 
+    }
+}
+)
+
+router.get('/past', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const events = await eventBusiness.getPastEvents();
+        res.json(events);
+    } catch (error) {
+        next(error);
+    }
+}
+)
+
+router.get('/user', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const events = await eventBusiness.getUserEvents(TokenHandler.tokenUserId);
+        res.json(events);
+    } catch (error) {
+        next(error);
+    }
+}
+)
+
+
 router.post('/', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const eventDto: EventDTO = plainToInstance(EventDTO, req.body);
