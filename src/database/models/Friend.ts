@@ -5,9 +5,16 @@ import {
     DataType,
     ForeignKey,
     BelongsTo,
-    PrimaryKey
+    PrimaryKey,
+    Unique
 } from "sequelize-typescript";
 import User from "./User";
+
+export enum FriendRequestStatuses {
+    accepted    = "accepted",
+    pending     = "pending",
+    rejected    = "rejected"
+}
 
 @Table({
     timestamps: false,
@@ -20,11 +27,13 @@ class Friend extends Model {
     @PrimaryKey
     @Column({
         type: DataType.INTEGER,
-        allowNull: false
+        allowNull: false,
+        autoIncrement: true
     })
     declare id: number;
 
     @ForeignKey(() => User)
+    @Unique({name: 'userId1-userId2', msg: 'This friendship already exists or is pending'})
     @Column({
         type: DataType.INTEGER,
         allowNull: false
@@ -32,6 +41,7 @@ class Friend extends Model {
     declare userId1: number;
 
     @ForeignKey(() => User)
+    @Unique({name: 'userId1-userId2', msg: 'This friendship already exists or is pending'})
     @Column({
         type: DataType.INTEGER,
         allowNull: false
@@ -46,7 +56,8 @@ class Friend extends Model {
 
     @Column({
         type: DataType.DATE,
-        allowNull: false
+        allowNull: true,
+        defaultValue: DataType.NOW
     })
     declare date: Date;
 
@@ -54,7 +65,7 @@ class Friend extends Model {
         type: DataType.ENUM('pending', 'accepted', 'rejected'),
         allowNull: false,
     })
-    declare status: string;
-    
+    declare status: FriendRequestStatuses;
+
 }
 export default Friend;
