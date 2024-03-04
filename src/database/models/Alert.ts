@@ -27,12 +27,6 @@ class Alert extends Model
     declare title: string;
 
     @Column({
-        type: DataType.TEXT,
-        allowNull: true
-    })
-    declare context: string|null;
-
-    @Column({
         type: DataType.STRING,
         allowNull: true
     })
@@ -43,6 +37,13 @@ class Alert extends Model
         allowNull: true
     })
     declare zip_code: number|null;
+
+    @Column({
+        type: DataType.DATE,
+        allowNull: false,
+        defaultValue: DataType.NOW
+    })
+    declare createdAt: Date;
 }
 
 export default Alert;

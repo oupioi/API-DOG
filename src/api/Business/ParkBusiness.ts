@@ -36,7 +36,7 @@ export class ParkBusiness {
      * @returns List of parks
      */
     public async getAllParks() {
-        const parks: { rows: Park[], count: number } = await Park.findAndCountAll();
+        const parks: { rows: Park[], count: number } = await Park.findAndCountAll({ include: { all: true } });
         return parks
     }
 
@@ -46,8 +46,55 @@ export class ParkBusiness {
      * @returns Promise<Park>
      */
     public async getParkById(id: number) {
-        let park: Park | null = await Park.findByPk(id);
+        let park: Park | null = await Park.findByPk(id, { include: { all: true } });
         return park;
+    }
+
+    /**
+     * Get parks by zip_code address
+     * @param zip_code 
+     * @returns List of parks
+     */
+    public async getParkByZipCode(zip_code: number) {
+        const parks: { rows: Park[], count: number } = await Park.findAndCountAll(
+            {
+                include: [{
+                    model: Address,
+                    where: {
+                        zip_code: {
+                            [Op.startsWith]: `${zip_code}`
+                        }
+                    },
+                    all: true
+                }]
+            });
+        return parks;
+    }
+
+    /**
+     * Modify a park
+     * @param parkDto 
+     * @returns Park
+     */
+    public async modifyPark(parkDto: ParkDTO) {
+
+        let park: Park = await Park.findByPk(parkDto.id,
+            {
+                include: { model: Address, as: 'address' }
+            }
+        );
+
+        if (!park) {
+            throw new CustomError("Not found", 404);
+        }
+
+        park.name = parkDto.name;
+        park.topography = parkDto.topography;
+
+        await this.addressBusiness.modifyAddress(park.address.id, parkDto.address);
+
+        await park.save();
+        return await Park.findByPk(park.id, { include: { all: true } });
     }
 
     /**
@@ -62,25 +109,5 @@ export class ParkBusiness {
         } else {
             throw new CustomError("Park not found");
         }
-    }
-
-    /**
-     * Get parks by zip_code address
-     * @param zip_code 
-     * @returns List of parks
-     */
-    public async getParkByZipCode(zip_code: number) {
-        const parks: { rows: Park[], count: number } = await Park.findAndCountAll(
-        {
-            include: [{
-                model: Address,
-                where: {
-                    zip_code: {
-                        [Op.startsWith]: `${zip_code}`
-                    }
-                }
-            }]
-        });
-        return parks;
     }
 }
