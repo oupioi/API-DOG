@@ -8,7 +8,7 @@ import breedController from "./Controllers/BreedController";
 import sexController from "./Controllers/SexController";
 import adminController from "./admin/AdminController";
 import addressController from "./Controllers/AddressController";
-
+import friendController from "./Controllers/FriendController";
 const router: Router = express.Router();
 
 router.use('/customer', userController);
@@ -20,5 +20,6 @@ router.use('/breed', breedController);
 router.use('/address', addressController);
 router.use('/sex', sexController)
 router.use('/admin', adminController)
+router.use('/friend', friendController);
 
 export default router;
