@@ -26,5 +26,7 @@ export class EventDTO{
 
     address: AddressDTO;
 
+    founder: number;
+
     tabUser: number[];
 }

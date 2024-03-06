@@ -35,6 +35,7 @@ export class EventBusiness {
             date:           eventDto.date,
             address:        eventDto.address,
             idAddress:      address.id,
+            founder:        TokenHandler.tokenUserId,
         });
         await newEvent.save();
         if(this.getEvent(newEvent.id)){
@@ -54,6 +55,17 @@ export class EventBusiness {
     public async getAllEvents()
     {
         const events = await Event.findAndCountAll({include:{model: Address, as: 'address'}});
+        return events;
+    }
+
+
+    /**
+     * Return every event created by the user
+     * @returns
+     */
+    public async getMyEvents()
+    {
+        const events = await Event.findAndCountAll({where: {founder: TokenHandler.tokenUserId}, include:{model: Address, as: 'address'}});
         return events;
     }
 

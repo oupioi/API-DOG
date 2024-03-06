@@ -91,6 +91,12 @@ class Event extends Model
     })
     declare distance: number;
 
+    @Column ({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare founder: number;
+
     @BelongsToMany(() => User, () => EventUser)
     tabUser: User['id'][];
 

@@ -52,6 +52,19 @@ router.get('/user', TokenHandler.handle, async (req: Request, res: Response, nex
 }
 )
 
+router.get('/myevent', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const events : { rows: Event[], count: number }= await eventBusiness.getMyEvents();
+        res.json({
+            total_items: events.count,
+            events: events.rows
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+)
+
 
 router.post('/', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
