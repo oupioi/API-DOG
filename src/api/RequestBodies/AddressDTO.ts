@@ -1,5 +1,5 @@
 export class AddressDTO {
-    id: number|null;
+    id?: number|null;
     
     address: string;
 
