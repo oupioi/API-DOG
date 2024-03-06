@@ -76,7 +76,6 @@ router.get('/:id', TokenHandler.handle, async (req: Request, res: Response, next
 
 router.put('/:id', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
-
         const eventDto: EventDTO = plainToInstance(EventDTO, req.body);
         const event: Event = await eventBusiness.modifyEvent(parseInt(req.params.id), eventDto);
         res.status(200).json(event);
