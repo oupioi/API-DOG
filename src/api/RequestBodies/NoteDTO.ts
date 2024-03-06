@@ -1,7 +1,7 @@
 import { ParkDTO } from "./ParkDTO";
 
 export class NoteDTO {
-    id: number;
+    id?: number;
 
     note: number;
 

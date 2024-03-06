@@ -56,6 +56,12 @@ class Park extends Model
 
     declare setAddress: BelongsToSetAssociationMixin<Address, Address['id']>;
 
+    @Column({
+        type: DataType.BIGINT,
+        allowNull: true
+    })
+    declare idOsm: number;
+
 }
 
 export default Park;

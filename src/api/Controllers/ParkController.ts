@@ -4,9 +4,14 @@ import Park from "../../database/models/Park";
 import express, { Router, Request, Response, NextFunction } from "express";
 import { plainToInstance } from "class-transformer";
 import { TokenHandler } from "../../api/Tools/TokenHandler";
+import axios from "axios";
+import { AddressBusiness } from "../../api/Business/AddressBusiness";
+import Address from "database/models/Address";
+import { AddressDTO } from "api/RequestBodies/AddressDTO";
 
 const router: Router = express.Router();
 const parkBusiness: ParkBusiness = new ParkBusiness();
+const addressBusiness: AddressBusiness = new AddressBusiness();
 
 router.get('/', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -77,6 +82,20 @@ router.delete('/:id', TokenHandler.handle, async (req: Request, res: Response, n
         await parkBusiness.deletePark(parseInt(req.params.id));
         res.status(200).json({
             message: "Park deleted"
+        })
+    } catch (error) {
+        next(error);
+    }
+})
+
+/**
+ * @todo à déplacer dans le controller admin
+ */
+router.get('/admin/importPark', TokenHandler.handle, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await parkBusiness.importParks();
+        res.status(200).json({
+            message: "Park correctly imported"
         })
     } catch (error) {
         next(error);

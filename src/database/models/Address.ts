@@ -28,7 +28,7 @@ class Address extends Model
 
     @Column({
         type: DataType.INTEGER,
-        allowNull: false
+        allowNull: true
     })
     declare zipCode: number;
 
