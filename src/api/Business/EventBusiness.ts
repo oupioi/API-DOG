@@ -122,7 +122,6 @@ export class EventBusiness {
     public async modifyEvent(id: number,eventDto: EventDTO)
     {
         const event: Event = await Event.findByPk(id);
-        console.log(event);
         event.title = eventDto.title ?? event.title;
         event.description = eventDto.description ?? event.description;
         event.maxPeople = eventDto.maxPeople ?? event.maxPeople;
