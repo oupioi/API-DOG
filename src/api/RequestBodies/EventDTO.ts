@@ -18,6 +18,12 @@ export class EventDTO{
     
     date: Date;
 
+    allure: number;
+
+    temps: number;
+
+    distance: number;
+
     address: AddressDTO;
 
     tabUser: number[];

@@ -18,7 +18,12 @@ import { BelongsToSetAssociationMixin, NonAttribute } from "sequelize";
     timestamps: false,
     tableName: "event",
     modelName: "Event",
-    underscored: true
+    underscored: true, 
+    defaultScope: {
+        attributes: {
+        exclude: ["id_address"]
+        }
+    }
 })
 class Event extends Model
 {
@@ -43,13 +48,11 @@ class Event extends Model
 
     @Column({
         type: DataType.INTEGER,
-        allowNull: false
     })
     declare maxPeople: number;
 
     @Column({
         type: DataType.INTEGER,
-        allowNull: false
     })
     declare followers: number;
 
@@ -73,6 +76,21 @@ class Event extends Model
     })
     declare date: Date;
 
+    @Column ({
+        type: DataType.FLOAT,
+    })
+    declare allure: number;
+
+    @Column ({
+        type: DataType.FLOAT,
+    })
+    declare temps: number;
+
+    @Column ({
+        type: DataType.FLOAT,
+    })
+    declare distance: number;
+
     @BelongsToMany(() => User, () => EventUser)
     tabUser: User['id'][];
 
@@ -85,10 +103,9 @@ class Event extends Model
 
 
     @BelongsTo(() => Address, {
-        onDelete: "CASCADE",
+        onDelete: "CASCADE"
     })
-    declare address: NonAttribute<Address>; 
-
+    declare address: NonAttribute<Address>;
     declare setAddress: BelongsToSetAssociationMixin<Address, Address['id']>;
 
 }

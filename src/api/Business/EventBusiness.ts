@@ -5,6 +5,7 @@ import Address from "../../database/models/Address";
 import { AddressBusiness } from "./AddressBusiness";
 import { TokenHandler } from "../Tools/TokenHandler";
 import { Op } from "sequelize";
+import { AddressDTO } from "api/RequestBodies/AddressDTO";
 export class EventBusiness {
 
     private addressBusiness: AddressBusiness;
@@ -51,7 +52,7 @@ export class EventBusiness {
      */
     public async getAllEvents()
     {
-        const events = await Event.findAndCountAll();
+        const events = await Event.findAndCountAll({include:{model: Address, as: 'address'}});
         return events;
     }
 
@@ -62,7 +63,7 @@ export class EventBusiness {
      */
     public async getEvent(id: number)
     {
-        const event = await Event.findByPk(id);
+        const event = await Event.findByPk(id,{include:{model: Address, as: 'address'}});
         return event;
     }
 
@@ -100,12 +101,17 @@ export class EventBusiness {
      */
     public async addUserEvent(userid: number, eventid: number)
     {
-        let newEventUser: EventUser = new EventUser({
-            userId : userid,
-            eventId: eventid,
-        });
-        await newEventUser.save();
-        return newEventUser;
+        try {
+            const newEventUser = new EventUser({
+                userId: userid,
+                eventId: eventid
+            });
+            await newEventUser.save();
+            return newEventUser;
+        }
+        catch (error) {
+            throw  new Error("L'utilisateur est déjà inscrit à cet événement.");
+        }
     }
 
     /**
@@ -116,12 +122,18 @@ export class EventBusiness {
     public async modifyEvent(id: number,eventDto: EventDTO)
     {
         const event: Event = await Event.findByPk(id);
-        event.title = eventDto.title;
-        event.description = eventDto.description;
-        event.maxPeople = eventDto.maxPeople;
-        event.followers = eventDto.followers;
-        event.closed = eventDto.closed;
-        event.date = eventDto.date;
+        console.log(event);
+        event.title = eventDto.title ?? event.title;
+        event.description = eventDto.description ?? event.description;
+        event.maxPeople = eventDto.maxPeople ?? event.maxPeople;
+        event.followers = eventDto.followers ?? event.followers;
+        event.closed = eventDto.closed ?? event.closed;
+        event.date = eventDto.date  ?? event.date;
+        event.allure = eventDto.allure ?? event.allure;
+        event.temps = eventDto.temps ?? event.temps;
+        event.distance = eventDto.distance ?? event.distance;
+        event.public = eventDto.public ?? event.public;
+
         await this.addressBusiness.modifyAddress(event.idAddress, eventDto.address);
         
         await event.save();
@@ -171,7 +183,8 @@ export class EventBusiness {
                 date: {
                     [Op.lt]: new Date()
                 }
-            }
+            },
+            include:{model: Address, as: 'address'}
         });
         return events;
     }
@@ -187,7 +200,8 @@ export class EventBusiness {
                 date: {
                     [Op.gte]: new Date()
                 }
-            }
+            },
+            include:{model: Address, as: 'address'}
         });
         return events;
     }
