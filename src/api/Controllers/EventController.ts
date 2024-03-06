@@ -90,7 +90,7 @@ router.post('/join/:id_event', TokenHandler.handle, async (req: Request, res: Re
         const eventUser: EventUser = await eventBusiness.addUserEvent(TokenHandler.tokenUserId, parseInt(req.params.id_event));
         res.status(201).send(eventUser);
     } catch (error) {
-        next(error.message);
+        next(error);
     }
 }
 )

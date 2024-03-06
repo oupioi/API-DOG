@@ -6,6 +6,7 @@ import { AddressBusiness } from "./AddressBusiness";
 import { TokenHandler } from "../Tools/TokenHandler";
 import { Op } from "sequelize";
 import { AddressDTO } from "api/RequestBodies/AddressDTO";
+import { CustomError } from "../../api/Tools/ErrorHandler";
 export class EventBusiness {
 
     private addressBusiness: AddressBusiness;
@@ -110,7 +111,7 @@ export class EventBusiness {
             return newEventUser;
         }
         catch (error) {
-            throw  new Error("L'utilisateur est déjà inscrit à cet événement.");
+            throw new CustomError("L'utilisateur est déjà inscrit à cet événement.");
         }
     }
 
