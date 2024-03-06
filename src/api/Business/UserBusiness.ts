@@ -235,4 +235,18 @@ export class UserBusiness {
         });
         return users;
     }
+
+    /**
+     * Return user by its id
+     * @param id User id
+     * @returns Promise<User>
+     */
+    public async getUserByIdA(id: number)
+    {
+        let user: User|null = await User.findByPk(id, {include: [{model: Dog, as:'dogs'}]});
+        if (!user) {
+            throw new CustomError('No user found', 404);
+        }
+        return user;
+    }
 }

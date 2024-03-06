@@ -1,5 +1,3 @@
-import Alert from "database/models/Alert";
-import { AlertBusiness } from "../../api/Business/AlertBusiness";
 import { UserBusiness } from "../../api/Business/UserBusiness";
 import express, { Router, Request, Response, NextFunction } from "express";
 import { plainToInstance } from "class-transformer";
@@ -19,6 +17,15 @@ router.get('/customer/ihm', TokenHandler.handle, TokenHandler.isAdmin, async (re
             total_items: result.count,
             users: result.rows
         });
+    } catch (error) {
+        next(error)
+    }
+})
+router.get('/customer/:id', TokenHandler.handle, TokenHandler.isAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    const userBusiness: UserBusiness = new UserBusiness();
+    try {
+        const result = await userBusiness.getUserByIdA(parseInt(req.params.id));
+        res.status(200).json(result);
     } catch (error) {
         next(error)
     }
