@@ -1,5 +1,3 @@
-import Alert from "database/models/Alert";
-import { AlertBusiness } from "../../api/Business/AlertBusiness";
 import { UserBusiness } from "../../api/Business/UserBusiness";
 import express, { Router, Request, Response, NextFunction } from "express";
 import { plainToInstance } from "class-transformer";
@@ -14,11 +12,29 @@ const router: Router = express.Router();
 router.get('/customer/ihm', TokenHandler.handle, TokenHandler.isAdmin, async (req: Request, res: Response, next: NextFunction) => {
     const userBusiness: UserBusiness = new UserBusiness();
     try {
-        const result = await userBusiness.getUserIHM(req.query?.email as string, req.query?.pseudo as string, parseInt(req.query?.limit as string));
+        const result = await userBusiness.getUserIHM(req.query?.email as string, req.query?.pseudo as string, parseInt(req.query?.limit as string), parseInt(req.query?.offset as string));
         res.status(200).json({
             total_items: result.count,
             users: result.rows
         });
+    } catch (error) {
+        next(error)
+    }
+})
+router.get('/customer/:id', TokenHandler.handle, TokenHandler.isAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    const userBusiness: UserBusiness = new UserBusiness();
+    try {
+        const result = await userBusiness.getUserByIdA(parseInt(req.params.id));
+        res.status(200).json(result);
+    } catch (error) {
+        next(error)
+    }
+})
+router.get('/customer/:id', TokenHandler.handle, TokenHandler.isAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    const userBusiness: UserBusiness = new UserBusiness();
+    try {
+        const result = await userBusiness.getUserById(parseInt(req.params.id));
+        res.status(200).json(result);
     } catch (error) {
         next(error)
     }

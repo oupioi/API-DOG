@@ -211,7 +211,7 @@ export class UserBusiness {
     /**
      * Users IHM for admin screen 
      */
-    public async getUserIHM(email?: string, pseudo?: string, limit?: number)
+    public async getUserIHM(email?: string, pseudo?: string, limit?: number, offset?: number)
     {
         let whereClause = {};
 
@@ -230,8 +230,23 @@ export class UserBusiness {
         
         const users: { rows: User[]; count: number; } = await User.findAndCountAll({
             where: whereClause,
-            limit: 20
+            limit: 20,
+            ...(offset && {offset: offset})
         });
         return users;
+    }
+
+    /**
+     * Return user by its id
+     * @param id User id
+     * @returns Promise<User>
+     */
+    public async getUserByIdA(id: number)
+    {
+        let user: User|null = await User.findByPk(id, {include: [{model: Dog, as:'dogs'}]});
+        if (!user) {
+            throw new CustomError('No user found', 404);
+        }
+        return user;
     }
 }
