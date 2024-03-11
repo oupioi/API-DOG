@@ -5,7 +5,6 @@ import Address from "../../database/models/Address";
 import { AddressBusiness } from "./AddressBusiness";
 import { TokenHandler } from "../Tools/TokenHandler";
 import { Op } from "sequelize";
-import { AddressDTO } from "api/RequestBodies/AddressDTO";
 import { CustomError } from "../../api/Tools/ErrorHandler";
 export class EventBusiness {
 
@@ -24,26 +23,24 @@ export class EventBusiness {
      */
     public async createEvent(eventDto: EventDTO)
     {
-       try{
-        const address: Address = await this.addressBusiness.createAddress(eventDto.address);
-        let newEvent: Event = new Event({
-            title:          eventDto.title,
-            description:    eventDto.description,
-            maxPeople:      eventDto.maxPeople,
-            followers:      eventDto.followers,
-            closed:         eventDto.closed,
-            date:           eventDto.date,
-            address:        eventDto.address,
-            idAddress:      address.id,
-            founder:        TokenHandler.tokenUserId,
-        });
-        await newEvent.save();
-        if(this.getEvent(newEvent.id)){
-            this.addUserEvent(TokenHandler.tokenUserId, newEvent.id);
-        }
-        return await this.getEvent(newEvent.id);
-    } catch (error) {
-        throw error;
+        try {
+            const address: Address = await this.addressBusiness.createAddress(eventDto.address);
+            const newEvent: Event = new Event({
+                title: eventDto.title,
+                description: eventDto.description,
+                maxPeople: eventDto.maxPeople,
+                followers: eventDto.followers,
+                closed: eventDto.closed,
+                date: eventDto.date,
+                address: eventDto.address,
+                idAddress: address.id,
+                founder: TokenHandler.tokenUserId,
+            });
+            await newEvent.save();
+            await this.addUserEvent(TokenHandler.tokenUserId, newEvent.id);
+            return await this.getEvent(newEvent.id);
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -87,8 +84,18 @@ export class EventBusiness {
      */
     public async deleteEvent(id: number)
     {
-        const event = await Event.findByPk(id);
-        await event.destroy();
+        
+        try
+        {
+            const event = await Event.findByPk(id);
+            if (event.founder != TokenHandler.tokenUserId) {
+                throw new CustomError("Vous n'avez pas les droits pour supprimer cet événement.");
+            }else {
+                await event.destroy();
+            }
+        } catch (error) {
+            throw new CustomError("Erreur lors de la suppression de l'événement.");
+        }
     }
 
     /**
@@ -98,32 +105,54 @@ export class EventBusiness {
      */
     public async getUsers(id: number)
     {
-        const users = await EventUser.findAll({
-            where: {
-                idEvent: id
-            }
-        });
-        return users;
+        try {
+            const users = await EventUser.findAll({
+                where: {
+                    eventId: id
+                }
+            });
+            return users;
+        }
+        catch (error) {
+            throw new CustomError("Erreur lors de la récupération des utilisateurs de l'événement.");
+        }
     }
 
     /**
      * Adds a user to an event
      * @param userId User id
      * @param eventId Event id 
-     * @returns
+     * @returns The newly created EventUser object
      */
-    public async addUserEvent(userid: number, eventid: number)
-    {
+    public async addUserEvent(userId: number, eventId: number): Promise<EventUser> {
+        const existingEventUser = await EventUser.findOne({ where: { userId, eventId } });
+        if (existingEventUser) {
+            throw new CustomError("L'utilisateur est déjà inscrit à cet événement.");
+        }
+
+        const event = await Event.findByPk(eventId);
+        if (!event) {
+            throw new CustomError("L'événement n'existe pas.");
+        }
+
+        if (event.closed) {
+            throw new CustomError("L'événement est fermé.");
+        }
+
+        const eventUserCount = await EventUser.count({ where: { eventId } });
+        if (eventUserCount >= event.maxPeople) {
+            throw new CustomError("L'événement est complet.");
+        }
+
         try {
             const newEventUser = new EventUser({
-                userId: userid,
-                eventId: eventid
+                userId,
+                eventId
             });
             await newEventUser.save();
             return newEventUser;
-        }
-        catch (error) {
-            throw new CustomError("L'utilisateur est déjà inscrit à cet événement.");
+        } catch (error) {
+            throw new CustomError("Erreur lors de l'inscription à l'événement.");
         }
     }
 
@@ -134,6 +163,9 @@ export class EventBusiness {
      */
     public async modifyEvent(id: number,eventDto: EventDTO)
     {
+        if (await Event.findByPk(id).then(event => event.founder) != TokenHandler.tokenUserId) {
+            throw new CustomError("Vous n'avez pas les droits pour modifier cet événement.");
+        }
         const event: Event = await Event.findByPk(id);
         event.title = eventDto.title ?? event.title;
         event.description = eventDto.description ?? event.description;
